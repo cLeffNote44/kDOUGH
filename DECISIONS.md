@@ -92,7 +92,7 @@ Non-obvious choices and the reasoning behind them. Updated as decisions are made
 
 **Why:** Sonnet is the sweet spot — fast enough for a near-real-time import flow (~5-10 seconds), smart enough to parse messy HTML and read handwritten recipe cards. Haiku would be cheaper but less reliable on complex pages. Opus would be overkill and slower for this structured extraction task.
 
-**Trade-off:** ~$0.003-0.01 per import. Acceptable for a single-household app that imports a handful of recipes per week.
+**Trade-off:** ~$0.003-0.01 per import. Acceptable for a meal planning app that imports a handful of recipes per week.
 
 ---
 
