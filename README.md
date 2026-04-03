@@ -2,6 +2,33 @@
 
 A meal planning and grocery shopping app built for a single household. Plan dinners for the week, import recipes from anywhere, and generate an organized grocery list in one tap.
 
+## Screenshots
+
+### Weekly Meal Planner
+![Weekly Calendar](docs/screenshots/Dashboard.png)
+The main dashboard — plan meals by dragging recipes onto a weekly calendar grid. Shows today's highlight, week navigation, and a summary bar with meal counts.
+
+### Recipe Collection
+![Recipes Page](docs/screenshots/Recipes.png)
+Browse your saved recipes with search, import from URL, or add manually. Cards show title, description, and prep/cook times.
+
+### Grocery List
+![Grocery List](docs/screenshots/Grocery_List.png)
+Auto-generated grocery list from your week's meal plan. Items grouped by aisle category (Produce, Meat & Seafood, Dairy & Eggs, etc.) with a progress bar and sort toggle (Category / A-Z / Recipe).
+
+### Add & Edit Recipes
+![Add Recipe](docs/screenshots/Add_Recipe.png)
+Create recipes manually with title, description, prep/cook time, ingredients, instructions, source URL, and tags.
+
+![Edit Recipe](docs/screenshots/Edit_Recipe.png)
+Edit existing recipes — full ingredient list with quantity, unit, and name fields.
+
+### Import Recipes
+![Import Recipe](docs/screenshots/Add_URL.png)
+Import recipes from any URL or snap a photo. The app automatically extracts title, ingredients, and instructions.
+
+---
+
 ## The Core Loop
 
 ```
