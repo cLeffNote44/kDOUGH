@@ -109,10 +109,9 @@ Open [http://localhost:3000](http://localhost:3000) — you should see the login
 | `ARCHITECTURE.md`        | Folder structure, database schema, data flow           |
 | `CHANGELOG.md`           | Running log of what got done and when                  |
 | `DECISIONS.md`           | Non-obvious technical choices and reasoning            |
-| `TODO.md`                | Completed work + backlog of post-MVP features          |
-| `ISSUES_AND_GAPS.md`     | Known issues checklist, prioritized for launch         |
-| `claude_scaling_plan.md` | Competitive analysis + feature roadmap for scaling     |
-| `UI Upgrades.md`         | 25-item UI upgrade checklist (all complete)            |
+| `ROADMAP.md`             | Completed phases + future feature roadmap              |
+| `CONTRIBUTING.md`        | How to contribute — setup, branches, PR guidelines     |
+| `SECURITY.md`            | Vulnerability reporting and security practices         |
 
 ## Scripts
 
