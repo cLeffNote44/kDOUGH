@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { removeRecipeFromDay, moveRecipeToSlot } from "@/lib/actions";
-import { getMonday, toDateString } from "@/lib/dates";
+import { toDateString } from "@/lib/dates";
 import type { MealPlan } from "@/types";
 import { DAYS, MEAL_TYPES } from "./meal-types";
 import type { DragPayload } from "./MealSlot";
@@ -17,9 +17,10 @@ import RecipeDetailModal from "./RecipeDetailModal";
 interface WeeklyCalendarProps {
   mealPlans: MealPlan[];
   weekStart: string;
+  isCurrentWeek: boolean;
 }
 
-export default function WeeklyCalendar({ mealPlans, weekStart }: WeeklyCalendarProps) {
+export default function WeeklyCalendar({ mealPlans, weekStart, isCurrentWeek }: WeeklyCalendarProps) {
   // Picker / detail state
   const [pickerDate, setPickerDate] = useState<string | null>(null);
   const [pickerDay, setPickerDay] = useState("");
@@ -176,8 +177,6 @@ export default function WeeklyCalendar({ mealPlans, weekStart }: WeeklyCalendarP
     );
   };
 
-  const isCurrentWeek = weekStart === toDateString(getMonday());
-
   return (
     <>
       {/* Week navigation */}
@@ -188,12 +187,16 @@ export default function WeeklyCalendar({ mealPlans, weekStart }: WeeklyCalendarP
         >
           &larr; Prev
         </button>
-        {!isCurrentWeek && (
+        {isCurrentWeek ? (
+          <span className="px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
+            This Week
+          </span>
+        ) : (
           <button
             onClick={() => router.push("/")}
             className="px-3 py-1.5 text-xs font-medium text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
           >
-            Today
+            Go to This Week
           </button>
         )}
         <button

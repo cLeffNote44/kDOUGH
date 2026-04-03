@@ -86,7 +86,7 @@ export default async function HomePage({
           })}
         </p>
       </div>
-      <WeeklyCalendar mealPlans={mealPlans} weekStart={mondayStr} />
+      <WeeklyCalendar mealPlans={mealPlans} weekStart={mondayStr} isCurrentWeek={isCurrentWeek} />
     </div>
   );
 }

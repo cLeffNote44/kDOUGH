@@ -74,28 +74,34 @@ describe("getMonday", () => {
 describe("toDateString", () => {
   it("formats a date as YYYY-MM-DD", () => {
     const date = new Date("2025-03-15T00:00:00");
-    // toDateString uses toISOString which is UTC — we just test the format
     const result = toDateString(date);
     expect(result).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
   it("pads single-digit months and days", () => {
-    // January 5, using UTC-based date to match toISOString behavior
-    const date = new Date(Date.UTC(2025, 0, 5));
+    // Use local time constructor to avoid UTC offset issues
+    const date = new Date(2025, 0, 5); // Jan 5, 2025 local
     const result = toDateString(date);
     expect(result).toBe("2025-01-05");
   });
 
   it("handles December 31", () => {
-    const date = new Date(Date.UTC(2025, 11, 31));
+    const date = new Date(2025, 11, 31); // Dec 31, 2025 local
     const result = toDateString(date);
     expect(result).toBe("2025-12-31");
   });
 
   it("handles January 1", () => {
-    const date = new Date(Date.UTC(2025, 0, 1));
+    const date = new Date(2025, 0, 1); // Jan 1, 2025 local
     const result = toDateString(date);
     expect(result).toBe("2025-01-01");
+  });
+
+  it("uses local time, not UTC", () => {
+    // 11pm EDT on March 15 = March 16 in UTC
+    // toDateString should return March 15 (the local date)
+    const date = new Date(2025, 2, 15, 23, 0, 0); // Mar 15 at 11pm local
+    expect(toDateString(date)).toBe("2025-03-15");
   });
 });
 

@@ -27,10 +27,17 @@ export function getMonday(dateStr?: string): Date {
 }
 
 /**
- * Format a Date as an ISO date string (YYYY-MM-DD).
+ * Format a Date as an ISO date string (YYYY-MM-DD) in **local** time.
+ *
+ * IMPORTANT: Do NOT use `date.toISOString().split("T")[0]` — that converts
+ * to UTC first, which shifts the date forward by a day for users in US
+ * timezones after ~5-8pm local time.
  */
 export function toDateString(date: Date): string {
-  return date.toISOString().split("T")[0];
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 /**
