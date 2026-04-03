@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { toDateString } from "@/lib/dates";
 
 export default function WeekNav({
   weekStart,
@@ -14,15 +15,13 @@ export default function WeekNav({
   const prevWeek = () => {
     const d = new Date(weekStart + "T00:00:00");
     d.setDate(d.getDate() - 7);
-    const newStart = d.toISOString().split("T")[0];
-    router.push(`/grocery?week=${newStart}`);
+    router.push(`/grocery?week=${toDateString(d)}`);
   };
 
   const nextWeek = () => {
     const d = new Date(weekStart + "T00:00:00");
     d.setDate(d.getDate() + 7);
-    const newStart = d.toISOString().split("T")[0];
-    router.push(`/grocery?week=${newStart}`);
+    router.push(`/grocery?week=${toDateString(d)}`);
   };
 
   const goToThisWeek = () => {
@@ -37,12 +36,16 @@ export default function WeekNav({
       >
         &larr; Prev
       </button>
-      {!isCurrentWeek && (
+      {isCurrentWeek ? (
+        <span className="px-3 py-1.5 text-sm font-semibold text-amber-700 dark:text-amber-400">
+          This Week
+        </span>
+      ) : (
         <button
           onClick={goToThisWeek}
           className="px-3 py-1.5 text-sm font-medium text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
         >
-          This Week
+          Go to This Week
         </button>
       )}
       <button

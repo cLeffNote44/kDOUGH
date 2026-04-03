@@ -470,7 +470,7 @@ export async function generateGroceryList(weekStart: string) {
   const monday = new Date(weekStart + "T00:00:00");
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
-  const sundayStr = sunday.toISOString().split("T")[0];
+  const sundayStr = `${sunday.getFullYear()}-${String(sunday.getMonth() + 1).padStart(2, "0")}-${String(sunday.getDate()).padStart(2, "0")}`;
 
   // Fetch all meal plans for this user's week with recipe data
   const { data: mealPlans, error: fetchError } = await supabase
