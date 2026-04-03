@@ -1,6 +1,6 @@
 # kDOUGH — Meal Planner
 
-A meal planning and grocery shopping app built for a single household. Plan dinners for the week, import recipes from anywhere, and generate an organized grocery list in one tap.
+An open-source meal planning and grocery list app. Plan your week, import recipes from any URL, and generate an organized grocery list in one tap.
 
 ## Screenshots
 
@@ -163,6 +163,12 @@ The `.dmg` is not code-signed or notarized. macOS will block it on first launch.
 
 You only need to do this once. After the first launch, macOS remembers your choice.
 
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
+
 ## License
 
-Private — single-household use.
+MIT License. See [LICENSE](LICENSE) for details.
