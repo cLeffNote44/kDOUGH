@@ -75,10 +75,48 @@ High-level phases and milestones. Done items stay visible, marked with ✅.
 
 ---
 
-## Future (Post-MVP)
+## Future Roadmap
 
-- [ ] iPhone app (native or PWA)
-- [ ] Recipe scaling (adjust servings → recalculate ingredients)
-- [ ] Favorite/frequently-used recipes surfaced on calendar
-- [ ] Leftover tracking (mark meals that produce leftovers for next-day lunch)
-- [ ] Seasonal/holiday meal planning templates
+### Tier 1 — High Differentiation
+
+| Feature | Description |
+|---------|-------------|
+| Cascade Meal Planning | Sunday's roast chicken becomes Monday's tacos. The app understands leftovers and plans the week as a connected cooking system. |
+| Pantry + Expiration Tracking | Track fridge/pantry ingredients with expiration dates. Prioritize recipes that use what's about to expire. |
+| Batch Cooking Mode | "Meal Prep Sunday" mode with a unified cooking timeline, container guidance, and storage labels. |
+| Adaptive Scheduling | When you skip a meal, the app reschedules the recipe, adjusts the grocery list, and suggests a quick alternative. |
+
+### Tier 2 — Strong Retention
+
+| Feature | Description |
+|---------|-------------|
+| Recipe Scaling | Adjust servings, ingredients recalculate automatically. |
+| Smart Ingredient Reuse | Prefer recipes that share ingredients across the week to reduce waste and cost. |
+| Cooking Skill Progression | Tag recipes by difficulty. Track techniques. Gradually suggest harder recipes. |
+| Household Profiles | Track what each family member liked/disliked. Find meals everyone enjoys. |
+
+### Tier 3 — Table Stakes
+
+| Feature | Description |
+|---------|-------------|
+| Dietary Preferences & Allergies | Set once during onboarding, filter everywhere. |
+| Nutritional Info | Calories and macros per recipe via nutrition API or AI estimation. |
+| Favorites | Surface frequently-used recipes at the top of the picker. |
+| Offline Mode | Recipes stored locally for kitchens with weak WiFi and stores with no reception. |
+| iPhone App | Native or PWA for mobile access. |
+
+### Tier 4 — Moonshot
+
+| Feature | Description |
+|---------|-------------|
+| Voice-Guided Cooking | Hands-free step-by-step instructions. |
+| Grocery Delivery Integration | Connect to Instacart/Amazon Fresh. |
+| Budget Tracking | Show actual cost of this week's meal plan at your local store. |
+
+### Recommended Priority
+
+1. Recipe scaling — quick win, users expect it
+2. Cascade meal planning — genuinely innovative, nobody does this
+3. Dietary preferences — table stakes to compete
+4. Batch cooking mode — massive underserved audience
+5. PWA/iPhone — needed for app store distribution
