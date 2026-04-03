@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --font-sans: var(--font-geist);
+  --font-display: var(--font-outfit);
+}
+
+/* Prevent browser default pull-to-refresh so our custom one works */
+body {
+  overscroll-behavior-y: contain;
+}
+
+/* ── Glass morphism utilities ─────────────────── */
+
+.glass {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+:is(.dark, .dark *) .glass {
+  background: rgba(28, 25, 23, 0.7);
+}
+
+:is(.dark, .dark *) .glass-strong {
+  background: rgba(28, 25, 23, 0.88);
+}
+
+/* ── Gradient button ──────────────────────────── */
+
+.btn-gradient {
+  background: linear-gradient(135deg, #f59e0b, #ea580c);
+  color: white;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-gradient:hover {
+  background: linear-gradient(135deg, #d97706, #c2410c);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+}
+
+.btn-gradient:disabled {
+  background: linear-gradient(135deg, #fbbf24, #fb923c);
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+/* ── Smooth transitions for dark mode ─────────── */
+
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ── Skeleton shimmer ──────────────────────────── */
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+:is(.dark, .dark *) .skeleton-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ── Card hover lift ───────────────────────────── */
+
+.card-hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.08), 0 4px 10px -6px rgba(0, 0, 0, 0.04);
+}
+
+:is(.dark, .dark *) .card-hover-lift:hover {
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 10px -6px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Page transitions ──────────────────────────── */
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition {
+  animation: page-fade-in 0.2s ease-out;
+}
+
+/* ── Drag & Drop (calendar) ──────────────────── */
+
+.meal-slot-draggable {
+  cursor: grab;
+}
+
+.meal-slot-dragging {
+  opacity: 0.4;
+  cursor: grabbing;
+}
+
+.meal-slot-drag-over {
+  outline: 2px dashed currentColor;
+  outline-offset: -2px;
+  transform: scale(1.02);
+}

@@ -1,0 +1,21 @@
+# ── OS ────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Editors / IDEs ────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Claude Code ───────────────────────────────
+.claude/
+
+# ── Environment / secrets ─────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── Node (catch-all for root-level) ──────────
+node_modules/
