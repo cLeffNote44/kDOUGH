@@ -20,8 +20,19 @@ where gl.user_id = keep.user_id
     or (gl.created_at = keep.created_at and gl.id < keep.id)
   );
 
-alter table public.grocery_lists
-  add constraint grocery_lists_user_week_unique unique (user_id, week_start);
+-- Idempotent: an earlier migration (20260624000004) may already have added this
+-- exact constraint. Guard so a fresh, in-order migration run doesn't fail with
+-- "constraint already exists"; the dedupe above still protects the add on any
+-- history where this migration is the one that introduces it.
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'grocery_lists_user_week_unique'
+  ) then
+    alter table public.grocery_lists
+      add constraint grocery_lists_user_week_unique unique (user_id, week_start);
+  end if;
+end $$;
 
 -- The per-user UNIQUE(user_id, date, meal_type) on meal_plans already covers
 -- every per-user date-range query via its leading (user_id, date) prefix. The
