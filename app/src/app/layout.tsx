@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import { Geist, Outfit } from "next/font/google";
 import ThemeProvider from "@/components/ThemeProvider";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "@/lib/env"; // Validate required env vars at startup
 import "./globals.css";
 
@@ -59,6 +61,8 @@ export default async function RootLayout({
         <ThemeProvider initialTheme={isDark ? "dark" : "light"}>
           {children}
         </ThemeProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

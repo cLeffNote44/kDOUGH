@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 // Standalone output is needed ONLY for Electron packaging (main.js loads the
 // flat .next/standalone/server.js). It must NOT be set on Vercel: Vercel manages
@@ -51,4 +52,24 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Source-map upload requires SENTRY_AUTH_TOKEN; it must be absent in local dev,
+// tokenless CI, and Electron builds — and the build MUST still pass there. Only
+// enable the upload plugin when the token + org/project are all present. Without
+// them, withSentryConfig is a thin pass-through that leaves output/tracing/images
+// /headers (and the isVercel gating above) exactly as configured.
+const sentryUploadEnabled =
+  !!process.env.SENTRY_AUTH_TOKEN &&
+  !!process.env.SENTRY_ORG &&
+  !!process.env.SENTRY_PROJECT;
+
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  // Gate all source-map upload on the token so tokenless builds never fail.
+  sourcemaps: { disable: !sentryUploadEnabled },
+  // Route Sentry's browser requests through a same-origin path — covered by the
+  // existing CSP `connect-src 'self'`, so no header change is needed.
+  tunnelRoute: "/monitoring",
+});
