@@ -43,14 +43,9 @@ const CATEGORY_ICONS: Record<string, string> = {
 
 function formatItemDisplay(item: GroceryItem): string {
   const parts: string[] = [];
-  if (item.quantity && item.quantity !== 1) {
-    // Format nicely
+  if (item.quantity != null && item.quantity > 0) {
     const q = item.quantity;
-    if (q === Math.floor(q)) {
-      parts.push(q.toString());
-    } else {
-      parts.push(q.toFixed(1).replace(/\.0$/, ""));
-    }
+    parts.push(q === Math.floor(q) ? q.toString() : q.toFixed(1).replace(/\.0$/, ""));
   }
   if (item.unit) {
     parts.push(item.unit);

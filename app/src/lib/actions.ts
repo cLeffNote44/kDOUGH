@@ -6,8 +6,8 @@ import { redirect } from "next/navigation";
 import type { Ingredient } from "@/types";
 import {
   categorizeIngredient,
-  normalizeUnit,
-  parseQuantity,
+  consolidateIngredients,
+  type RawGroceryIngredient,
 } from "@/lib/import/parser";
 import {
   recipeFormSchema,
@@ -492,15 +492,9 @@ export async function generateGroceryList(weekStart: string) {
     return { error: "No meals planned for this week. Add recipes to your calendar first." };
   }
 
-  // Aggregate ingredients across all planned recipes
-  // Key: "normalized_name|normalized_unit" → { totalQty, unit, name, recipeIds }
-  const aggregated = new Map<string, {
-    name: string;
-    totalQty: number;
-    unit: string;
-    recipeIds: Set<string>;
-  }>();
-
+  // Flatten every planned recipe's ingredients into raw rows, then consolidate
+  // (see consolidateIngredients for the name/unit matching + summing rules).
+  const rawIngredients: RawGroceryIngredient[] = [];
   for (const plan of mealPlans) {
     // Safely extract recipe data — Supabase joins return the related row as an object
     const recipe = plan.recipes as Record<string, unknown> | null;
@@ -514,27 +508,19 @@ export async function generateGroceryList(weekStart: string) {
       const ing = typeof raw === "object" && raw !== null ? (raw as Record<string, unknown>) : null;
       if (!ing) continue;
 
-      const name = typeof ing.name === "string" ? ing.name.toLowerCase().trim() : "";
-      if (!name) continue;
+      const name = typeof ing.name === "string" ? ing.name : "";
+      if (!name.trim()) continue;
 
-      const unit = normalizeUnit(typeof ing.unit === "string" ? ing.unit : "");
-      const key = `${name}|${unit}`;
-      const qty = parseQuantity(typeof ing.quantity === "string" ? ing.quantity : String(ing.quantity ?? ""));
-
-      if (aggregated.has(key)) {
-        const existing = aggregated.get(key)!;
-        existing.totalQty += qty;
-        existing.recipeIds.add(recipeId);
-      } else {
-        aggregated.set(key, {
-          name: typeof ing.name === "string" ? ing.name.trim() : name,
-          totalQty: qty,
-          unit,
-          recipeIds: new Set([recipeId]),
-        });
-      }
+      rawIngredients.push({
+        name,
+        unit: typeof ing.unit === "string" ? ing.unit : "",
+        quantity: typeof ing.quantity === "string" ? ing.quantity : String(ing.quantity ?? ""),
+        recipeId,
+      });
     }
   }
+
+  const consolidated = consolidateIngredients(rawIngredients);
 
   // Delete existing grocery list for this week (if regenerating) — filter by user_id
   const { data: existingList } = await supabase
@@ -542,7 +528,7 @@ export async function generateGroceryList(weekStart: string) {
     .select("id")
     .eq("week_start", weekStart)
     .eq("user_id", user.id)
-    .single();
+    .maybeSingle();
 
   if (existingList) {
     await supabase.from("grocery_items").delete().eq("list_id", existingList.id);
@@ -562,14 +548,14 @@ export async function generateGroceryList(weekStart: string) {
   }
 
   // Insert aggregated items
-  const items = Array.from(aggregated.values()).map((item) => ({
+  const items = consolidated.map((item) => ({
     list_id: newList.id,
     name: item.name,
-    quantity: item.totalQty,
-    unit: item.unit || null,
+    quantity: item.quantity,
+    unit: item.unit,
     category: categorizeIngredient(item.name),
     checked: false,
-    recipe_ids: Array.from(item.recipeIds),
+    recipe_ids: item.recipeIds,
     is_manual: false,
   }));
 

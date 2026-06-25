@@ -15,6 +15,9 @@ export default async function GroceryPage({
 }) {
   const { week } = await searchParams;
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const monday = getMonday(week);
   const weekStart = toDateString(monday);
@@ -24,7 +27,8 @@ export default async function GroceryPage({
     .from("grocery_lists")
     .select("id, week_start")
     .eq("week_start", weekStart)
-    .single();
+    .eq("user_id", user?.id ?? "")
+    .maybeSingle();
 
   let items: GroceryItem[] = [];
   if (groceryList) {

@@ -4,8 +4,11 @@ import {
   parseIngredientsList,
   normalizeUnit,
   parseQuantity,
+  parseQuantityStrict,
   formatQuantity,
   categorizeIngredient,
+  canonicalizeIngredientName,
+  consolidateIngredients,
   CATEGORY_MAP,
 } from "./parser";
 
@@ -393,5 +396,105 @@ describe("categorizeIngredient", () => {
   it("does partial matching", () => {
     expect(categorizeIngredient("fresh spinach leaves")).toBe("produce");
     expect(categorizeIngredient("boneless chicken thighs")).toBe("meat");
+  });
+});
+
+// ──────────────────────────────────────────────
+// parseQuantityStrict
+// ──────────────────────────────────────────────
+
+describe("parseQuantityStrict", () => {
+  it("returns null for empty / whitespace / unparseable", () => {
+    expect(parseQuantityStrict("")).toBeNull();
+    expect(parseQuantityStrict("   ")).toBeNull();
+    expect(parseQuantityStrict("to taste")).toBeNull();
+  });
+
+  it("parses whole numbers, decimals, fractions, and mixed numbers", () => {
+    expect(parseQuantityStrict("2")).toBe(2);
+    expect(parseQuantityStrict("2.5")).toBe(2.5);
+    expect(parseQuantityStrict("1/2")).toBe(0.5);
+    expect(parseQuantityStrict("1 1/2")).toBe(1.5);
+  });
+});
+
+// ──────────────────────────────────────────────
+// canonicalizeIngredientName
+// ──────────────────────────────────────────────
+
+describe("canonicalizeIngredientName", () => {
+  it("lowercases, trims, and collapses whitespace", () => {
+    expect(canonicalizeIngredientName("  Olive   Oil ")).toBe("olive oil");
+  });
+
+  it("strips prep adjectives", () => {
+    expect(canonicalizeIngredientName("shredded mozzarella cheese")).toBe("mozzarella cheese");
+    expect(canonicalizeIngredientName("finely chopped onion")).toBe("onion");
+  });
+
+  it("singularizes so plurals match", () => {
+    expect(canonicalizeIngredientName("eggs")).toBe("egg");
+    expect(canonicalizeIngredientName("large egg")).toBe("egg");
+    expect(canonicalizeIngredientName("tomatoes")).toBe("tomato");
+  });
+
+  it("keeps product-distinguishing words (does not over-strip)", () => {
+    // "ground" and colors change what you buy, so they must survive
+    expect(canonicalizeIngredientName("ground beef")).toBe("ground beef");
+    expect(canonicalizeIngredientName("yellow onion")).toBe("yellow onion");
+  });
+});
+
+// ──────────────────────────────────────────────
+// consolidateIngredients
+// ──────────────────────────────────────────────
+
+describe("consolidateIngredients", () => {
+  it("sums quantities for the same item across recipes", () => {
+    const result = consolidateIngredients([
+      { name: "garlic", unit: "cloves", quantity: "2", recipeId: "a" },
+      { name: "garlic", unit: "clove", quantity: "2", recipeId: "b" },
+    ]);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ name: "garlic", quantity: 4, unit: "clove" });
+    expect(result[0].recipeIds.sort()).toEqual(["a", "b"]);
+  });
+
+  it("merges the same item written with prep adjectives or plurals", () => {
+    const result = consolidateIngredients([
+      { name: "shredded mozzarella cheese", unit: "cups", quantity: "4", recipeId: "a" },
+      { name: "mozzarella cheese", unit: "cup", quantity: "2", recipeId: "b" },
+    ]);
+    expect(result).toHaveLength(1);
+    expect(result[0].quantity).toBe(6);
+    expect(result[0].unit).toBe("cup");
+    // prefers the shorter, cleaner display name
+    expect(result[0].name).toBe("mozzarella cheese");
+  });
+
+  it("keeps unquantified items unquantified instead of counting as 1", () => {
+    const result = consolidateIngredients([
+      { name: "salt and pepper to taste", unit: "", quantity: "", recipeId: "a" },
+      { name: "salt and pepper to taste", unit: "", quantity: "", recipeId: "b" },
+    ]);
+    expect(result).toHaveLength(1);
+    expect(result[0].quantity).toBeNull();
+  });
+
+  it("does not merge the same name in incompatible units (no conversion)", () => {
+    const result = consolidateIngredients([
+      { name: "tomato paste", unit: "ounces", quantity: "6", recipeId: "a" },
+      { name: "tomato paste", unit: "tablespoons", quantity: "2", recipeId: "b" },
+    ]);
+    expect(result).toHaveLength(2);
+  });
+
+  it("skips blank ingredient names", () => {
+    const result = consolidateIngredients([
+      { name: "  ", unit: "", quantity: "1", recipeId: "a" },
+      { name: "flour", unit: "cup", quantity: "2", recipeId: "a" },
+    ]);
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe("flour");
   });
 });
