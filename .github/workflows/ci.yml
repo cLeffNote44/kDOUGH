@@ -42,12 +42,10 @@ jobs:
 
   # Logged-out e2e flows: login renders + protected-route redirect, run through
   # the real Next server. No Supabase data/auth dependency, so this GATES merges.
-  # Chromium is preinstalled (PLAYWRIGHT_BROWSERS_PATH) — never run `playwright install`.
   e2e-unauth:
     needs: test
     runs-on: ubuntu-latest
     env:
-      PLAYWRIGHT_BROWSERS_PATH: /opt/pw-browsers
       E2E_BASE_URL: http://localhost:3000
       # Placeholder fallbacks so this gating job boots (and stays green) even with
       # no secrets set. The unauth flows never touch a real Supabase: /login is
@@ -63,6 +61,8 @@ jobs:
         cache: 'npm'
         cache-dependency-path: app/package-lock.json
     - run: cd app && npm ci
+    # GitHub-hosted runners don't ship Playwright browsers — install Chromium.
+    - run: cd app && npx playwright install --with-deps chromium
     - run: cd app && npm run build
     - name: Run unauthenticated e2e
       run: cd app && npx playwright test --project=chromium-unauth
@@ -76,7 +76,6 @@ jobs:
     if: github.event_name == 'push'
     continue-on-error: true
     env:
-      PLAYWRIGHT_BROWSERS_PATH: /opt/pw-browsers
       E2E_BASE_URL: http://localhost:3000
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
@@ -91,6 +90,7 @@ jobs:
         cache: 'npm'
         cache-dependency-path: app/package-lock.json
     - run: cd app && npm ci
+    - run: cd app && npx playwright install --with-deps chromium
     - run: cd app && npm run build
     - name: Run authed smoke (setup + authed projects)
       run: cd app && npx playwright test --project=setup --project=chromium-authed
