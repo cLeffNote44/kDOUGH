@@ -8,10 +8,12 @@
 -- A's recipes, meal_plans, grocery_lists, or grocery_items. The grocery_items
 -- assertions specifically guard the fix in
 -- 20260625000000_fix_grocery_items_rls.sql — before that migration the policy
--- only checked auth.role()='authenticated', so these would FAIL (cross-tenant leak).
+-- only checked auth.role()='authenticated', so the read would FAIL (cross-tenant
+-- leak). Write attempts by B silently affect zero rows under RLS (no error), so
+-- they are verified by checking that A's data is unchanged afterwards.
 
 begin;
-select plan(9);
+select plan(7);
 
 -- Authenticate as a given user for subsequent statements in this transaction.
 create or replace function _login_as(uid uuid) returns void as $$
@@ -25,15 +27,7 @@ begin
 end;
 $$ language plpgsql;
 
-create or replace function _logout() returns void as $$
-begin
-  perform set_config('role', 'postgres', true);
-  perform set_config('request.jwt.claims', null, true);
-end;
-$$ language plpgsql;
-
--- Seed two auth users (service context).
-select _logout();
+-- Seed two auth users in the privileged (postgres) context.
 insert into auth.users (id, email)
 values
   ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'a@example.test'),
@@ -90,21 +84,22 @@ select is(
   0, 'B cannot read A''s grocery_items (cross-tenant leak fixed)'
 );
 
--- Writes by B against A's rows must affect zero rows (RLS WITH CHECK / USING).
+-- B's write attempts against A's rows match zero rows under RLS (no error raised).
 update public.grocery_items set name = 'hacked' where id = '44444444-4444-4444-4444-444444444444';
-select is(row_count(), 0, 'B cannot UPDATE A''s grocery_items');
-
 delete from public.grocery_items where id = '44444444-4444-4444-4444-444444444444';
-select is(row_count(), 0, 'B cannot DELETE A''s grocery_items');
-
 delete from public.recipes where id = '11111111-1111-1111-1111-111111111111';
-select is(row_count(), 0, 'B cannot DELETE A''s recipes');
 
--- ── Confirm A's data is still intact after B's attempts ──────────────
+-- ── Back as A: data must be intact, proving B's writes did nothing ───
 select _login_as('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+
 select is(
   (select name from public.grocery_items where id = '44444444-4444-4444-4444-444444444444'),
-  'A''s secret item', 'A''s grocery_item is unmodified after B''s attempts'
+  'A''s secret item', 'A''s grocery_item is unmodified/undeleted after B''s attempts'
+);
+
+select is(
+  (select count(*)::int from public.recipes where id = '11111111-1111-1111-1111-111111111111'),
+  1, 'A''s recipe still exists after B''s delete attempt'
 );
 
 select * from finish();
