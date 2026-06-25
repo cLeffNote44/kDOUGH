@@ -12,8 +12,10 @@ import { parseQuantity, formatQuantity } from "@/lib/import/parser";
 export function scaleIngredient(ing: Ingredient, multiplier: number): Ingredient {
   if (!ing.quantity || multiplier === 1) return ing;
 
+  // parseQuantity returns null for an unmeasured amount ("to taste", "a pinch")
+  // and could be 0; in either case there is nothing to scale, so leave it as-is.
   const parsed = parseQuantity(ing.quantity);
-  if (parsed === 0) return ing;
+  if (parsed === null || parsed === 0) return ing;
 
   const scaled = parsed * multiplier;
   return {

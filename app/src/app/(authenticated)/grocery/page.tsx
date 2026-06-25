@@ -24,7 +24,7 @@ export default async function GroceryPage({
     .from("grocery_lists")
     .select("id, week_start")
     .eq("week_start", weekStart)
-    .single();
+    .maybeSingle();
 
   let items: GroceryItem[] = [];
   if (groceryList) {
@@ -83,7 +83,15 @@ export default async function GroceryPage({
       <WeekNav weekStart={weekStart} isCurrentWeek={isCurrentWeek} />
 
       {groceryList && items.length > 0 ? (
-        <GroceryListView items={items} listId={groceryList.id} recipeMap={recipeMap} />
+        // key forces a fresh mount when the list changes (regenerate creates a
+        // new id; week-nav changes the week) so the view re-seeds from server
+        // data instead of showing stale optimistic state.
+        <GroceryListView
+          key={groceryList.id}
+          items={items}
+          listId={groceryList.id}
+          recipeMap={recipeMap}
+        />
       ) : (
         <div className="text-center py-16 glass rounded-xl border border-stone-200/60 dark:border-stone-700/40">
           <EmptyGroceryIllustration />

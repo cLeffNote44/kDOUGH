@@ -13,13 +13,24 @@ const required = [
 
 // Optional but recommended for scraper
 const optional = ["SCRAPER_TIMEOUT_MS", "ANTHROPIC_API_KEY"] as const;
+void optional; // documented for reference; not validated (all optional)
 
-for (const key of required) {
-  if (!process.env[key]) {
-    throw new Error(
-      `Missing required environment variable: ${key}\n` +
-        "Copy .env.example to .env.local and fill in the values."
-    );
+// Skip the hard fail during `next build` (no runtime env is available while
+// collecting page data / prerendering static pages) and during unit tests.
+// Validation still runs whenever the server actually boots.
+const skipValidation =
+  process.env.NEXT_PHASE === "phase-production-build" ||
+  process.env.NODE_ENV === "test" ||
+  !!process.env.VITEST;
+
+if (!skipValidation) {
+  for (const key of required) {
+    if (!process.env[key]) {
+      throw new Error(
+        `Missing required environment variable: ${key}\n` +
+          "Copy .env.example to .env.local and fill in the values."
+      );
+    }
   }
 }
 

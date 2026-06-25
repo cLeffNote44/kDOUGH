@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { removeRecipeFromDay, moveRecipeToSlot } from "@/lib/actions";
@@ -13,6 +13,8 @@ import MealSlotExpanded from "./MealSlotExpanded";
 import WeekSummaryBar from "./WeekSummaryBar";
 import RecipePicker from "./RecipePicker";
 import RecipeDetailModal from "./RecipeDetailModal";
+import MoveMealModal from "./MoveMealModal";
+import { useFocusTrap } from "@/components/useFocusTrap";
 
 interface WeeklyCalendarProps {
   mealPlans: MealPlan[];
@@ -28,6 +30,8 @@ export default function WeeklyCalendar({ mealPlans, weekStart, isCurrentWeek }: 
   const [removing, setRemoving] = useState<string | null>(null);
   const [confirmRemove, setConfirmRemove] = useState<{ id: string; title: string; mealLabel: string } | null>(null);
   const [detailPlan, setDetailPlan] = useState<{ plan: MealPlan; mealLabel: string; date: string; dayLabel: string; mealType: string } | null>(null);
+  // Keyboard/touch-accessible meal move (alternative to drag-and-drop).
+  const [moveTarget, setMoveTarget] = useState<{ plan: MealPlan; date: string; mealType: string } | null>(null);
 
   // C9: Expansion state
   const [expandedSlot, setExpandedSlot] = useState<string | null>(null);
@@ -38,18 +42,9 @@ export default function WeeklyCalendar({ mealPlans, weekStart, isCurrentWeek }: 
 
   const router = useRouter();
 
-  // Escape key closes confirm dialog
-  const handleEscapeKey = useCallback((e: KeyboardEvent) => {
-    if (e.key === "Escape" && confirmRemove) {
-      e.preventDefault();
-      setConfirmRemove(null);
-    }
-  }, [confirmRemove]);
-
-  useEffect(() => {
-    document.addEventListener("keydown", handleEscapeKey);
-    return () => document.removeEventListener("keydown", handleEscapeKey);
-  }, [handleEscapeKey]);
+  // Focus trap + Escape-to-close for the inline remove-confirm dialog.
+  const confirmDialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(confirmDialogRef, () => setConfirmRemove(null), !!confirmRemove);
 
   // Build planMap: date → meal_type → plan
   const planMap = new Map<string, Map<string, MealPlan>>();
@@ -144,7 +139,11 @@ export default function WeeklyCalendar({ mealPlans, weekStart, isCurrentWeek }: 
     setDropTarget(null);
     setDragPayload(null);
 
-    await moveRecipeToSlot(dragPayload.mealPlanId, dragPayload.recipeId, date, mealType);
+    const result = await moveRecipeToSlot(dragPayload.mealPlanId, dragPayload.recipeId, date, mealType);
+    if (result?.error) {
+      toast.error(result.error);
+      return;
+    }
     toast.success("Meal moved");
     router.refresh();
   };
@@ -172,6 +171,10 @@ export default function WeeklyCalendar({ mealPlans, weekStart, isCurrentWeek }: 
         onViewFull={() => {
           setExpandedSlot(null);
           setDetailPlan({ plan, mealLabel, date, dayLabel, mealType });
+        }}
+        onMove={() => {
+          setExpandedSlot(null);
+          setMoveTarget({ plan, date, mealType });
         }}
       />
     );
@@ -257,9 +260,20 @@ export default function WeeklyCalendar({ mealPlans, weekStart, isCurrentWeek }: 
 
       {/* Remove confirmation dialog */}
       {confirmRemove && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="glass-strong rounded-xl shadow-lg w-full max-w-xs mx-4 p-5 border border-stone-200/60 dark:border-stone-700/40">
-            <h3 className="font-display font-semibold text-stone-900 dark:text-stone-100 mb-1">Remove meal?</h3>
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setConfirmRemove(null);
+          }}
+        >
+          <div
+            ref={confirmDialogRef}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="remove-meal-title"
+            className="glass-strong rounded-xl shadow-lg w-full max-w-xs mx-4 p-5 border border-stone-200/60 dark:border-stone-700/40"
+          >
+            <h3 id="remove-meal-title" className="font-display font-semibold text-stone-900 dark:text-stone-100 mb-1">Remove meal?</h3>
             <p className="text-sm text-stone-500 dark:text-stone-400 mb-4">
               Remove <span className="font-medium text-stone-700 dark:text-stone-300">{confirmRemove.title}</span> from {confirmRemove.mealLabel.toLowerCase()}?
             </p>
@@ -303,6 +317,28 @@ export default function WeeklyCalendar({ mealPlans, weekStart, isCurrentWeek }: 
           mealType={pickerMealType}
           onClose={() => {
             setPickerDate(null);
+            router.refresh();
+          }}
+        />
+      )}
+
+      {/* Accessible move-meal modal (keyboard/touch alternative to drag-and-drop) */}
+      {moveTarget && (
+        <MoveMealModal
+          mealPlanId={moveTarget.plan.id}
+          recipeId={moveTarget.plan.recipe_id}
+          recipeTitle={moveTarget.plan.recipes?.title ?? "this meal"}
+          sourceDate={moveTarget.date}
+          sourceMealType={moveTarget.mealType}
+          weekStart={weekStart}
+          occupied={
+            new Set(
+              mealPlans.map((p) => `${p.date}|${p.meal_type}`)
+            )
+          }
+          onClose={() => setMoveTarget(null)}
+          onMoved={() => {
+            setMoveTarget(null);
             router.refresh();
           }}
         />

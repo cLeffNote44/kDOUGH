@@ -28,6 +28,28 @@ See [README.md](README.md) for full setup instructions.
 - `develop` — active development, PRs target this branch
 - `feat/*`, `fix/*` — short-lived feature/fix branches
 
+## Testing
+
+All commands run from `app/`:
+
+- `npm run typecheck` — `tsc --noEmit` over the whole project
+- `npm run lint` — ESLint
+- `npm test` — Vitest unit/component suite (lib logic, server-action aggregation,
+  SSRF guard, AI extraction, the auth middleware, and React components via jsdom)
+- `npm run test:e2e` — Playwright smoke flow against a **running** app. Requires a
+  live instance and a seeded account; provide `E2E_BASE_URL`, `E2E_EMAIL`, and
+  `E2E_PASSWORD` (it self-skips otherwise).
+- **RLS isolation tests** — `app/supabase/tests/rls_isolation_test.sql` (pgTAP)
+  asserts that one user cannot read or modify another user's recipes, meal plans,
+  grocery lists, or grocery items. Run against a local Supabase stack:
+  ```bash
+  supabase start
+  supabase test db
+  ```
+  Run this whenever you change a migration or an RLS policy.
+
+`npm run lint`, `npm run typecheck`, `npm test`, and `npm run build` all run in CI.
+
 ## Code Style
 
 - TypeScript strict mode

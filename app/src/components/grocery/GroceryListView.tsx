@@ -197,6 +197,16 @@ export default function GroceryListView({
     setOptimisticItems((prev) => [...prev, newItem]);
   };
 
+  const handleItemReconciled = (tempId: string, realItem: GroceryItem) => {
+    setOptimisticItems((prev) =>
+      prev.map((i) => (i.id === tempId ? realItem : i))
+    );
+  };
+
+  const handleItemFailed = (tempId: string) => {
+    setOptimisticItems((prev) => prev.filter((i) => i.id !== tempId));
+  };
+
   const totalItems = optimisticItems.length;
   const checkedCount = checked.length;
 
@@ -299,7 +309,12 @@ export default function GroceryListView({
       ))}
 
       {/* Add manual item */}
-      <AddItemForm listId={listId} onItemAdded={handleItemAdded} />
+      <AddItemForm
+        listId={listId}
+        onItemAdded={handleItemAdded}
+        onItemReconciled={handleItemReconciled}
+        onItemFailed={handleItemFailed}
+      />
 
       {/* Checked items (collapsed section) */}
       {checked.length > 0 && (

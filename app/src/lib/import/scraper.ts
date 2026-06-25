@@ -11,7 +11,7 @@
 import * as cheerio from "cheerio";
 import { parseIngredientLine } from "./parser";
 import { aiExtractFromHtml } from "./ai-assist";
-import { env } from "@/lib/env";
+import { safeFetch } from "./ssrf";
 import type { Ingredient } from "@/types";
 
 export interface ScrapedRecipe {
@@ -29,7 +29,7 @@ export interface ScrapedRecipe {
 /**
  * Parse ISO 8601 duration (PT30M, PT1H30M, etc.) to minutes.
  */
-function parseDuration(iso: string | undefined | null): number | null {
+export function parseDuration(iso: string | undefined | null): number | null {
   if (!iso || typeof iso !== "string") return null;
   const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
   if (!match) return null;
@@ -42,7 +42,7 @@ function parseDuration(iso: string | undefined | null): number | null {
  * Validate and sanitize an image URL. Allows only http/https protocols
  * and strips anything that could be an injection vector.
  */
-function sanitizeImageUrl(url: string): string {
+export function sanitizeImageUrl(url: string): string {
   if (!url || typeof url !== "string") return "";
   const trimmed = url.trim();
   // Only allow http/https URLs — block javascript:, data:, and other schemes
@@ -55,7 +55,7 @@ function sanitizeImageUrl(url: string): string {
 /**
  * Clean HTML tags from a string.
  */
-function stripHtml(html: string): string {
+export function stripHtml(html: string): string {
   return html
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/?(p|li|div|h\d)[^>]*>/gi, "\n")
@@ -73,7 +73,7 @@ function stripHtml(html: string): string {
 /**
  * Extract recipe from JSON-LD structured data.
  */
-function extractFromJsonLd($: cheerio.CheerioAPI, url: string): ScrapedRecipe | null {
+export function extractFromJsonLd($: cheerio.CheerioAPI, url: string): ScrapedRecipe | null {
   const scripts = $('script[type="application/ld+json"]');
   for (let i = 0; i < scripts.length; i++) {
     try {
@@ -164,7 +164,7 @@ function extractFromJsonLd($: cheerio.CheerioAPI, url: string): ScrapedRecipe | 
 /**
  * Heuristic fallback: extract recipe data from page HTML structure.
  */
-function extractFromHtml($: cheerio.CheerioAPI, url: string): ScrapedRecipe | null {
+export function extractFromHtml($: cheerio.CheerioAPI, url: string): ScrapedRecipe | null {
   // Title: try common recipe title selectors
   const titleSelectors = [
     "h1.recipe-title",
@@ -250,7 +250,7 @@ function extractFromHtml($: cheerio.CheerioAPI, url: string): ScrapedRecipe | nu
   }
 
   // Description
-  let description =
+  const description =
     $('meta[name="description"]').attr("content") ||
     $('meta[property="og:description"]').attr("content") ||
     "";
@@ -276,14 +276,15 @@ function extractFromHtml($: cheerio.CheerioAPI, url: string): ScrapedRecipe | nu
  * Main entry point: scrape a recipe from a URL.
  */
 export async function scrapeRecipe(url: string): Promise<ScrapedRecipe> {
-  // Fetch the page
-  const response = await fetch(url, {
+  // Fetch the page through the SSRF-safe wrapper, which re-validates the
+  // private-IP guard on every redirect hop (a plain fetch would follow a
+  // redirect to an internal address without re-checking).
+  const response = await safeFetch(url, {
     headers: {
       "User-Agent":
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       Accept: "text/html,application/xhtml+xml",
     },
-    signal: AbortSignal.timeout(env.scraperTimeoutMs),
   });
 
   if (!response.ok) {

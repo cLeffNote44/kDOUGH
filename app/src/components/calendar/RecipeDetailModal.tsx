@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import type { Recipe, Ingredient } from "@/types";
 import { scaleIngredients } from "@/lib/scale-recipe";
 import ServingsAdjuster from "@/components/ServingsAdjuster";
+import { useFocusTrap } from "@/components/useFocusTrap";
 
 interface RecipeDetailModalProps {
   recipe: Recipe;
@@ -41,14 +42,8 @@ export default function RecipeDetailModal({
     return () => document.removeEventListener("mousedown", handleClick);
   }, [onClose]);
 
-  // Close on escape
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [onClose]);
+  // Focus trap + Escape-to-close + focus restore.
+  useFocusTrap(modalRef, onClose);
 
   const totalTime =
     (r.prep_time ?? 0) + (r.cook_time ?? 0) > 0
@@ -59,12 +54,15 @@ export default function RecipeDetailModal({
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
       <div
         ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="recipe-detail-title"
         className="glass-strong rounded-xl shadow-lg w-full max-w-md mx-4 max-h-[80vh] flex flex-col border border-stone-200/60 dark:border-stone-700/40"
       >
         {/* Header */}
         <div className="p-4 border-b border-stone-200/60 dark:border-stone-700/40 flex items-center justify-between">
           <div>
-            <h2 className="font-display font-semibold text-stone-900 dark:text-stone-100">{r.title}</h2>
+            <h2 id="recipe-detail-title" className="font-display font-semibold text-stone-900 dark:text-stone-100">{r.title}</h2>
             <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{mealLabel}</p>
           </div>
           <button

@@ -2,9 +2,10 @@ name: CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, develop ]
+  # No branch filter: validate every PR regardless of its target branch so the
+  # documented develop/feature-branch flow gets CI signal before merge.
   pull_request:
-    branches: [ main, master ]
 
 jobs:
   test:
@@ -25,6 +26,9 @@ jobs:
 
     - name: Run lint
       run: cd app && npm run lint
+
+    - name: Typecheck
+      run: cd app && npm run typecheck
 
     - name: Run tests
       run: cd app && npm test

@@ -8,9 +8,13 @@ import type { GroceryItem } from "@/types";
 export default function AddItemForm({
   listId,
   onItemAdded,
+  onItemReconciled,
+  onItemFailed,
 }: {
   listId: string;
   onItemAdded?: (item: GroceryItem) => void;
+  onItemReconciled?: (tempId: string, realItem: GroceryItem) => void;
+  onItemFailed?: (tempId: string) => void;
 }) {
   const [name, setName] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -22,10 +26,11 @@ export default function AddItemForm({
     const itemName = name.trim();
     setName("");
 
-    // Optimistic: create a placeholder item
+    // Optimistic: create a placeholder item with a temp id.
+    const tempId = `temp-${Date.now()}`;
     if (onItemAdded) {
       onItemAdded({
-        id: `temp-${Date.now()}`,
+        id: tempId,
         list_id: listId,
         name: itemName,
         quantity: 1,
@@ -42,6 +47,11 @@ export default function AddItemForm({
       const result = await addManualGroceryItem(listId, itemName);
       if (result?.error) {
         toast.error(result.error);
+        onItemFailed?.(tempId);
+      } else if (result?.item) {
+        // Swap the temp item for the real DB row (real UUID + computed category)
+        // so it can be checked/removed immediately, without a reload.
+        onItemReconciled?.(tempId, result.item);
       }
     });
   };

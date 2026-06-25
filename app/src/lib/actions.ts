@@ -3,12 +3,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { Ingredient } from "@/types";
+import type { Ingredient, GroceryItem } from "@/types";
+import { categorizeIngredient } from "@/lib/import/parser";
 import {
-  categorizeIngredient,
-  normalizeUnit,
-  parseQuantity,
-} from "@/lib/import/parser";
+  aggregateMealPlanIngredients,
+  type MealPlanWithRecipe,
+} from "@/lib/grocery-aggregate";
 import {
   recipeFormSchema,
   importedRecipeSchema,
@@ -492,49 +492,10 @@ export async function generateGroceryList(weekStart: string) {
     return { error: "No meals planned for this week. Add recipes to your calendar first." };
   }
 
-  // Aggregate ingredients across all planned recipes
-  // Key: "normalized_name|normalized_unit" → { totalQty, unit, name, recipeIds }
-  const aggregated = new Map<string, {
-    name: string;
-    totalQty: number;
-    unit: string;
-    recipeIds: Set<string>;
-  }>();
-
-  for (const plan of mealPlans) {
-    // Safely extract recipe data — Supabase joins return the related row as an object
-    const recipe = plan.recipes as Record<string, unknown> | null;
-    if (!recipe) continue;
-
-    const recipeId = typeof recipe.id === "string" ? recipe.id : null;
-    const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : [];
-    if (!recipeId || ingredients.length === 0) continue;
-
-    for (const raw of ingredients) {
-      const ing = typeof raw === "object" && raw !== null ? (raw as Record<string, unknown>) : null;
-      if (!ing) continue;
-
-      const name = typeof ing.name === "string" ? ing.name.toLowerCase().trim() : "";
-      if (!name) continue;
-
-      const unit = normalizeUnit(typeof ing.unit === "string" ? ing.unit : "");
-      const key = `${name}|${unit}`;
-      const qty = parseQuantity(typeof ing.quantity === "string" ? ing.quantity : String(ing.quantity ?? ""));
-
-      if (aggregated.has(key)) {
-        const existing = aggregated.get(key)!;
-        existing.totalQty += qty;
-        existing.recipeIds.add(recipeId);
-      } else {
-        aggregated.set(key, {
-          name: typeof ing.name === "string" ? ing.name.trim() : name,
-          totalQty: qty,
-          unit,
-          recipeIds: new Set([recipeId]),
-        });
-      }
-    }
-  }
+  // Aggregate ingredients across all planned recipes (pure, tested separately).
+  const aggregatedItems = aggregateMealPlanIngredients(
+    mealPlans as MealPlanWithRecipe[]
+  );
 
   // Delete existing grocery list for this week (if regenerating) — filter by user_id
   const { data: existingList } = await supabase
@@ -542,7 +503,7 @@ export async function generateGroceryList(weekStart: string) {
     .select("id")
     .eq("week_start", weekStart)
     .eq("user_id", user.id)
-    .single();
+    .maybeSingle();
 
   if (existingList) {
     await supabase.from("grocery_items").delete().eq("list_id", existingList.id);
@@ -562,14 +523,14 @@ export async function generateGroceryList(weekStart: string) {
   }
 
   // Insert aggregated items
-  const items = Array.from(aggregated.values()).map((item) => ({
+  const items = aggregatedItems.map((item) => ({
     list_id: newList.id,
     name: item.name,
-    quantity: item.totalQty,
-    unit: item.unit || null,
-    category: categorizeIngredient(item.name),
+    quantity: item.quantity,
+    unit: item.unit,
+    category: item.category,
     checked: false,
-    recipe_ids: Array.from(item.recipeIds),
+    recipe_ids: item.recipe_ids,
     is_manual: false,
   }));
 
@@ -654,16 +615,20 @@ export async function addManualGroceryItem(
     return { error: "Grocery list not found" };
   }
 
-  const { error } = await supabase.from("grocery_items").insert({
-    list_id: listIdResult.data,
-    name: trimmedName,
-    quantity: 1,
-    unit: null,
-    category: category || categorizeIngredient(name),
-    checked: false,
-    recipe_ids: [],
-    is_manual: true,
-  });
+  const { data: inserted, error } = await supabase
+    .from("grocery_items")
+    .insert({
+      list_id: listIdResult.data,
+      name: trimmedName,
+      quantity: 1,
+      unit: null,
+      category: category || categorizeIngredient(name),
+      checked: false,
+      recipe_ids: [],
+      is_manual: true,
+    })
+    .select("*")
+    .single();
 
   if (error) {
     console.error("addManualGroceryItem DB error:", error);
@@ -671,7 +636,9 @@ export async function addManualGroceryItem(
   }
 
   revalidatePath("/grocery");
-  return { success: true };
+  // Return the inserted row so the client can swap its optimistic temp-id item
+  // for the real UUID + computed category (so toggle/remove target a real row).
+  return { success: true, item: inserted as GroceryItem };
 }
 
 export async function removeGroceryItem(itemId: string) {
