@@ -149,14 +149,23 @@ export default function GroceryListView({
     localStorage.setItem("kd-grocery-sort", sortMode);
   }, [sortMode]);
 
-  // Split into unchecked and checked
-  const unchecked = optimisticItems.filter((i) => !i.checked);
-  const checked = optimisticItems.filter((i) => i.checked);
+  // Pantry staples are shown in a separate collapsed section, not the buy list.
+  const mainItems = optimisticItems.filter((i) => !i.is_pantry);
+  const pantryItems = optimisticItems.filter((i) => i.is_pantry);
+
+  // Split the buy list into unchecked and checked.
+  const unchecked = mainItems.filter((i) => !i.checked);
+  const checked = mainItems.filter((i) => i.checked);
 
   // Group unchecked items based on sort mode (memoized — groupItems sorts and
   // builds Maps; the linear filter above is cheap and left as-is).
   const groups = useMemo(
-    () => groupItems(optimisticItems.filter((i) => !i.checked), sortMode, recipeMap),
+    () =>
+      groupItems(
+        optimisticItems.filter((i) => !i.is_pantry && !i.checked),
+        sortMode,
+        recipeMap
+      ),
     [optimisticItems, sortMode, recipeMap]
   );
 
@@ -208,7 +217,7 @@ export default function GroceryListView({
     setOptimisticItems((prev) => prev.filter((i) => i.id !== tempId));
   };
 
-  const totalItems = optimisticItems.length;
+  const totalItems = mainItems.length;
   const checkedCount = checked.length;
 
   return (
@@ -352,6 +361,29 @@ export default function GroceryListView({
                 <span className="flex-1 text-stone-400 dark:text-stone-500 text-[15px] line-through">
                   {formatItemDisplay(item)}
                 </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Pantry staples (you likely already have these) */}
+      {pantryItems.length > 0 && (
+        <div className="glass rounded-xl border border-stone-200/60 dark:border-stone-700/40 overflow-hidden opacity-75">
+          <div className="px-4 py-2.5 bg-stone-50/80 dark:bg-stone-800/60 border-b border-stone-200/60 dark:border-stone-700/40">
+            <h2 className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide flex items-center gap-1.5">
+              <span className="text-base" aria-hidden="true">🥫</span>
+              Staples — you likely have these ({pantryItems.length})
+            </h2>
+          </div>
+          <ul className="divide-y divide-stone-100 dark:divide-stone-800">
+            {pantryItems.map((item) => (
+              <li
+                key={item.id}
+                className="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400"
+              >
+                <span className="text-base" aria-hidden="true">·</span>
+                <span className="flex-1 text-[15px]">{formatItemDisplay(item)}</span>
               </li>
             ))}
           </ul>

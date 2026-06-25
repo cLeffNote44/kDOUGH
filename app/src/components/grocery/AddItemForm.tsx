@@ -39,6 +39,7 @@ export default function AddItemForm({
         checked: false,
         recipe_ids: [],
         is_manual: true,
+        is_pantry: false,
         created_at: new Date().toISOString(),
       });
     }

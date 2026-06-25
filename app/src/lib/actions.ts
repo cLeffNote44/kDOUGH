@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { Ingredient, GroceryItem } from "@/types";
+import type { Ingredient, GroceryItem, PantryItem } from "@/types";
 import { categorizeIngredient } from "@/lib/import/parser";
 import {
   aggregateMealPlanIngredients,
@@ -489,6 +489,16 @@ export async function generateGroceryList(weekStart: string) {
     mealPlans as MealPlanWithRecipe[]
   );
 
+  // Pantry staples the user always has — flag matching items so they show in a
+  // collapsed "you likely have these" section instead of the buy list.
+  const { data: pantryRows } = await supabase
+    .from("pantry_items")
+    .select("name")
+    .eq("user_id", user.id);
+  const pantrySet = new Set(
+    (pantryRows ?? []).map((p) => p.name.toLowerCase().trim())
+  );
+
   // Delete existing grocery list for this week (if regenerating) — filter by user_id
   const { data: existingList } = await supabase
     .from("grocery_lists")
@@ -514,7 +524,7 @@ export async function generateGroceryList(weekStart: string) {
     return { error: "Failed to create grocery list. Please try again." };
   }
 
-  // Insert aggregated items
+  // Insert aggregated items, flagging pantry staples.
   const items = aggregatedItems.map((item) => ({
     list_id: newList.id,
     name: item.name,
@@ -524,6 +534,7 @@ export async function generateGroceryList(weekStart: string) {
     checked: false,
     recipe_ids: item.recipe_ids,
     is_manual: false,
+    is_pantry: pantrySet.has(item.name.toLowerCase().trim()),
   }));
 
   if (items.length > 0) {
@@ -665,6 +676,64 @@ export async function removeGroceryItem(itemId: string) {
     return { error: "Failed to remove item. Please try again." };
   }
 
+  revalidatePath("/grocery");
+  return { success: true };
+}
+
+// ============================================
+// PANTRY ACTIONS
+// ============================================
+
+export async function addPantryItem(name: string) {
+  const trimmed = name?.trim();
+  if (!trimmed) return { error: "Item name is required" };
+  if (trimmed.length > 100) return { error: "Item name is too long" };
+
+  const auth = await requireAuth();
+  if (auth.error) return { error: auth.error };
+  const { supabase, user } = auth;
+
+  // Store normalized (lowercase) so matching against grocery items is reliable;
+  // ignore duplicates via the unique (user_id, name) constraint.
+  const { data: inserted, error } = await supabase
+    .from("pantry_items")
+    .upsert(
+      { user_id: user.id, name: trimmed.toLowerCase() },
+      { onConflict: "user_id,name", ignoreDuplicates: true }
+    )
+    .select("id, name, created_at")
+    .maybeSingle();
+
+  if (error) {
+    console.error("addPantryItem DB error:", error);
+    return { error: "Failed to add staple. Please try again." };
+  }
+
+  revalidatePath("/pantry");
+  revalidatePath("/grocery");
+  return { success: true, item: inserted as PantryItem | null };
+}
+
+export async function removePantryItem(itemId: string) {
+  const idResult = uuidSchema.safeParse(itemId);
+  if (!idResult.success) return { error: "Invalid item ID" };
+
+  const auth = await requireAuth();
+  if (auth.error) return { error: auth.error };
+  const { supabase, user } = auth;
+
+  const { error } = await supabase
+    .from("pantry_items")
+    .delete()
+    .eq("id", idResult.data)
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("removePantryItem DB error:", error);
+    return { error: "Failed to remove staple. Please try again." };
+  }
+
+  revalidatePath("/pantry");
   revalidatePath("/grocery");
   return { success: true };
 }

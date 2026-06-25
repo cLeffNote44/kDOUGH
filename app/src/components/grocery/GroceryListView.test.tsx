@@ -27,6 +27,7 @@ function item(over: Partial<GroceryItem>): GroceryItem {
     checked: false,
     recipe_ids: [],
     is_manual: false,
+    is_pantry: false,
     created_at: "2026-01-01",
     ...over,
   };

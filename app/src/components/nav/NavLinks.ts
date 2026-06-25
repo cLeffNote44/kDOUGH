@@ -1,4 +1,4 @@
-export type NavIcon = "calendar" | "book" | "download" | "list";
+export type NavIcon = "calendar" | "book" | "download" | "list" | "pantry";
 
 export interface NavLink {
   href: string;
@@ -11,4 +11,5 @@ export const NAV_LINKS: NavLink[] = [
   { href: "/recipes", label: "Recipes", icon: "book" },
   { href: "/import", label: "Import", icon: "download" },
   { href: "/grocery", label: "Grocery", icon: "list" },
+  { href: "/pantry", label: "Pantry", icon: "pantry" },
 ];

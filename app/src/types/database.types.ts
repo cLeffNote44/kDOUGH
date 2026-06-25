@@ -25,6 +25,7 @@ export type Database = {
           created_at: string
           id: string
           is_manual: boolean
+          is_pantry: boolean
           list_id: string
           name: string
           quantity: number | null
@@ -37,6 +38,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_manual?: boolean
+          is_pantry?: boolean
           list_id: string
           name: string
           quantity?: number | null
@@ -49,6 +51,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_manual?: boolean
+          is_pantry?: boolean
           list_id?: string
           name?: string
           quantity?: number | null
@@ -123,6 +126,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pantry_items: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       recipes: {
         Row: {
