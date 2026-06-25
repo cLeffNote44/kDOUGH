@@ -16,7 +16,7 @@ export default function AuthenticatedLayout({
     <div className="min-h-screen md:ml-[72px]">
       <SessionGuard />
       <Nav />
-      <main className="max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-20 md:pb-6">
+      <main className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-20 md:pb-6">
         <PullToRefresh>{children}</PullToRefresh>
       </main>
       <Toaster />

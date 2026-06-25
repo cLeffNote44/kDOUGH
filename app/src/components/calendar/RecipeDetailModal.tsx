@@ -64,12 +64,12 @@ export default function RecipeDetailModal({
         <div className="p-4 border-b border-slate-200/60 dark:border-slate-700/40 flex items-center justify-between">
           <div>
             <h2 id="recipe-detail-title" className="font-display font-semibold text-slate-900 dark:text-slate-100">{r.title}</h2>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{mealLabel}</p>
+            <p className="text-xs text-slate-400 dark:text-slate-300 mt-0.5">{mealLabel}</p>
           </div>
           <button
             onClick={onClose}
             aria-label="Close recipe details"
-            className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 text-lg"
+            className="text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white text-lg"
           >
             &times;
           </button>

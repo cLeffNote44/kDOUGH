@@ -55,14 +55,14 @@ export default function DayCard({
       <div className="flex items-center justify-between mb-2">
         <span
           className={`text-xs font-semibold uppercase tracking-wide ${
-            isToday ? "text-teal-700 dark:text-teal-400" : "text-slate-400 dark:text-slate-500"
+            isToday ? "text-teal-700 dark:text-teal-400" : "text-slate-400 dark:text-slate-300"
           }`}
         >
           {dayLabel}
         </span>
         <span
           className={`text-xs ${
-            isToday ? "text-teal-600 dark:text-teal-400 font-medium" : "text-slate-400 dark:text-slate-500"
+            isToday ? "text-teal-600 dark:text-teal-400 font-medium" : "text-slate-400 dark:text-slate-300"
           }`}
         >
           {(() => {

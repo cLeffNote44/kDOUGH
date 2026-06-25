@@ -99,7 +99,7 @@ export default function RecipePicker({ date, dayLabel, mealType, onClose }: Reci
             <button
               onClick={onClose}
               aria-label="Close recipe picker"
-              className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 text-lg"
+              className="text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white text-lg"
             >
               &times;
             </button>
@@ -116,11 +116,11 @@ export default function RecipePicker({ date, dayLabel, mealType, onClose }: Reci
 
         <div className="overflow-y-auto flex-1 p-2">
           {loading ? (
-            <p className="text-center text-slate-400 dark:text-slate-500 py-8 text-sm">Loading recipes...</p>
+            <p className="text-center text-slate-400 dark:text-slate-300 py-8 text-sm">Loading recipes...</p>
           ) : filtered.length === 0 ? (
             <div className="text-center py-8">
               <EmptySearchIllustration />
-              <p className="text-slate-400 dark:text-slate-500 text-sm">
+              <p className="text-slate-400 dark:text-slate-300 text-sm">
                 {recipes.length === 0
                   ? "No recipes yet. Add some first!"
                   : "No recipes match your search."}

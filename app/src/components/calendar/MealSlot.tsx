@@ -57,7 +57,7 @@ export default function MealSlot({
     return (
       <div>
         <div
-          className={`${mt.bg} rounded-lg p-1.5 group relative transition-all ${
+          className={`${mt.bg} rounded-lg p-2 group relative overflow-hidden transition-all ${
             isDragSource ? "meal-slot-dragging" : ""
           } ${isDropTarget ? "meal-slot-drag-over" : ""} ${
             onDragStart ? "meal-slot-draggable" : ""
@@ -85,14 +85,14 @@ export default function MealSlot({
           }}
           onDragEnd={onDragEnd}
         >
-          <p className={`text-xs font-medium ${mt.text} truncate pr-5`}>
+          <p className={`text-xs font-medium ${mt.text} truncate pr-5 mb-0.5`}>
             {plan.recipes.title}
           </p>
-          <div className="flex items-center gap-1.5">
-            <span className={`text-[10px] ${mt.accent}`}>{mt.label}</span>
+          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 min-w-0">
+            <span className={`text-[10px] ${mt.accent} shrink-0`}>{mt.label}</span>
             {/* C10: Visual meal indicators */}
             {prep != null && prep > 0 && (
-              <span className={`flex items-center gap-0.5 ${mt.accent} opacity-70`}>
+              <span className={`flex items-center gap-0.5 ${mt.accent} opacity-70 shrink-0`}>
                 <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -100,7 +100,7 @@ export default function MealSlot({
               </span>
             )}
             {cook != null && cook > 0 && (
-              <span className={`flex items-center gap-0.5 ${mt.accent} opacity-70`}>
+              <span className={`flex items-center gap-0.5 ${mt.accent} opacity-70 shrink-0`}>
                 <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 18a3.75 3.75 0 00.495-7.468 5.99 5.99 0 00-1.925 3.547 5.975 5.975 0 01-2.133-1.001A3.75 3.75 0 0012 18z" />
@@ -157,11 +157,11 @@ export default function MealSlot({
         e.preventDefault();
         onDrop?.(e);
       }}
-      className={`w-full flex items-center justify-center h-7 border border-dashed border-slate-200 dark:border-slate-700 ${mt.hoverBorder} ${mt.hoverBg} rounded-md transition-colors cursor-pointer ${
+      className={`w-full flex items-center justify-center h-8 border border-dashed border-slate-300 dark:border-slate-400 ${mt.hoverBorder} ${mt.hoverBg} rounded-md transition-colors cursor-pointer ${
         isDropTarget ? "meal-slot-drag-over" : ""
       }`}
     >
-      <span className={`text-[10px] ${mt.muted}`}>+ {mt.label}</span>
+      <span className={`text-[11px] font-medium ${mt.muted}`}>+ {mt.label}</span>
     </button>
   );
 }
