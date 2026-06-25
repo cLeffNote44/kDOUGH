@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useTransition } from "react";
 import { toast } from "sonner";
 import { toggleGroceryItem, removeGroceryItem } from "@/lib/actions";
+import { formatQuantity } from "@/lib/import/parser";
 import type { GroceryItem } from "@/types";
 import AddItemForm from "./AddItemForm";
 import SwipeableItem from "./SwipeableItem";
@@ -43,14 +44,10 @@ const CATEGORY_ICONS: Record<string, string> = {
 
 function formatItemDisplay(item: GroceryItem): string {
   const parts: string[] = [];
-  if (item.quantity && item.quantity !== 1) {
-    // Format nicely
-    const q = item.quantity;
-    if (q === Math.floor(q)) {
-      parts.push(q.toString());
-    } else {
-      parts.push(q.toFixed(1).replace(/\.0$/, ""));
-    }
+  // Hide a lone quantity of 1 (e.g. "1 egg" reads better as "egg"); otherwise
+  // pretty-print fractions ("1 1/2 cup") via the shared formatter.
+  if (item.quantity != null && item.quantity !== 1) {
+    parts.push(formatQuantity(item.quantity));
   }
   if (item.unit) {
     parts.push(item.unit);

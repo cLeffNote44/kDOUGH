@@ -84,6 +84,34 @@ describe("aggregateMealPlanIngredients", () => {
     expect(result[0].recipe_ids).toEqual(["r1"]);
   });
 
+  it("consolidates compatible volume units into one line", () => {
+    const result = aggregateMealPlanIngredients([
+      plan("r1", [{ name: "milk", quantity: "2", unit: "cup" }]),
+      plan("r2", [{ name: "milk", quantity: "1", unit: "tbsp" }]),
+    ]);
+    expect(result).toHaveLength(1);
+    expect(result[0].unit).toBe("cup");
+    expect(result[0].quantity).toBeCloseTo(2.06, 1); // 2 cups + 1 tbsp
+  });
+
+  it("consolidates compatible weight units (1 lb + 8 oz -> 1.5 lb)", () => {
+    const result = aggregateMealPlanIngredients([
+      plan("r1", [{ name: "beef", quantity: "1", unit: "lb" }]),
+      plan("r2", [{ name: "beef", quantity: "8", unit: "oz" }]),
+    ]);
+    expect(result).toHaveLength(1);
+    expect(result[0].unit).toBe("lb");
+    expect(result[0].quantity).toBe(1.5);
+  });
+
+  it("keeps volume and weight as separate lines (cup vs weight-oz)", () => {
+    const result = aggregateMealPlanIngredients([
+      plan("r1", [{ name: "cheese", quantity: "1", unit: "cup" }]),
+      plan("r2", [{ name: "cheese", quantity: "4", unit: "oz" }]),
+    ]);
+    expect(result).toHaveLength(2);
+  });
+
   it("returns an empty array for no meal plans", () => {
     expect(aggregateMealPlanIngredients([])).toEqual([]);
   });
