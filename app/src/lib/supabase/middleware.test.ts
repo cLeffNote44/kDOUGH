@@ -49,4 +49,27 @@ describe("updateSession (auth route guard)", () => {
     const res = await updateSession(request("/grocery"));
     expect(locationOf(res)).toBeNull();
   });
+
+  it("does not redirect an authenticated user on /auth/callback", async () => {
+    // Only /login bounces authed users; auth callbacks must pass through so the
+    // session-exchange handler can run.
+    getUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+    const res = await updateSession(request("/auth/callback"));
+    expect(locationOf(res)).toBeNull();
+  });
+
+  it("redirects an unauthenticated user from a nested protected path to /login", async () => {
+    getUser.mockResolvedValue({ data: { user: null } });
+    const res = await updateSession(request("/recipes/123/edit"));
+    expect(res.status).toBe(307);
+    const loc = locationOf(res);
+    expect(loc && new URL(loc).pathname).toBe("/login");
+  });
+
+  it("keeps the login redirect on the same host (no open redirect)", async () => {
+    getUser.mockResolvedValue({ data: { user: null } });
+    const res = await updateSession(request("/recipes"));
+    const loc = locationOf(res);
+    expect(loc && new URL(loc).host).toBe("localhost:3000");
+  });
 });
