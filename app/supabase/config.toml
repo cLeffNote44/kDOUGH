@@ -1,0 +1,6 @@
+# Supabase project config for kDOUGH.
+# Link the CLI to the cloud project with:
+#   supabase link --project-ref svsjtphoigtqoewgtcjf
+# Then apply tracked migrations with:
+#   supabase db push
+project_id = "svsjtphoigtqoewgtcjf"
