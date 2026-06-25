@@ -29,7 +29,7 @@ export default function MobileHeader() {
           {/* Theme toggle */}
           <button
             onClick={toggle}
-            className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+            className="p-2 rounded-lg text-slate-400 dark:text-slate-200 hover:text-slate-600 dark:hover:text-white transition-colors"
             aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           >
             {theme === "dark" ? (
@@ -46,7 +46,7 @@ export default function MobileHeader() {
           {/* Sign out */}
           <button
             onClick={handleSignOut}
-            className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+            className="p-2 rounded-lg text-slate-400 dark:text-slate-200 hover:text-slate-600 dark:hover:text-white transition-colors"
             aria-label="Sign out"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

@@ -33,7 +33,7 @@ export default function Sidebar() {
         style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
       >
         <button onClick={() => navigate("/")} className="p-1">
-          <img src="/favicon-32.png" alt="kDOUGH" className="w-8 h-8 rounded-lg" />
+          <img src="/icon-192.png" alt="kDOUGH" className="w-10 h-10 rounded-lg" />
         </button>
       </div>
 
@@ -56,7 +56,7 @@ export default function Sidebar() {
               className={`flex flex-col items-center justify-center gap-0.5 w-14 h-14 rounded-xl transition-colors ${
                 isActive
                   ? "bg-gradient-to-b from-teal-100 to-teal-100 dark:from-teal-900/40 dark:to-teal-900/40 text-teal-700 dark:text-teal-400"
-                  : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50"
+                  : "text-slate-400 dark:text-slate-200 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/50"
               }`}
             >
               <NavIconSvg name={link.icon} />
@@ -77,7 +77,7 @@ export default function Sidebar() {
         <button
           onClick={toggle}
           title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          className="p-2.5 rounded-xl text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
+          className="p-2.5 rounded-xl text-slate-400 dark:text-slate-200 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
         >
           {theme === "dark" ? (
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -94,7 +94,7 @@ export default function Sidebar() {
         <button
           onClick={handleSignOut}
           title="Sign out"
-          className="p-2.5 rounded-xl text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
+          className="p-2.5 rounded-xl text-slate-400 dark:text-slate-200 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />

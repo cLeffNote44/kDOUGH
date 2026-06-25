@@ -33,7 +33,7 @@ export default function BottomTabBar() {
               className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors ${
                 isActive
                   ? "text-teal-600 dark:text-teal-400"
-                  : "text-slate-400 dark:text-slate-500"
+                  : "text-slate-400 dark:text-slate-200"
               }`}
             >
               <NavIconSvg name={link.icon} />
