@@ -279,6 +279,128 @@ export function formatQuantity(n: number): string {
   return n.toFixed(1).replace(/\.0$/, "");
 }
 
+// ============================================
+// GROCERY CONSOLIDATION (used by grocery list generation)
+// ============================================
+
+/**
+ * Prep/grade adjectives that don't change *what you buy*. Stripped when
+ * building the consolidation key so "shredded mozzarella" merges with
+ * "mozzarella". Intentionally conservative — words that change the product
+ * (e.g. "dried", "whole", "unsalted", colors) are deliberately excluded.
+ */
+const NAME_STOP_WORDS = new Set([
+  "fresh", "freshly", "finely", "coarsely", "roughly", "thinly", "thickly",
+  "chopped", "minced", "diced", "sliced", "grated", "shredded", "crushed",
+  "packed", "sifted", "softened", "melted", "divided",
+  "large", "small", "medium", "jumbo", "ripe", "lean",
+]);
+
+/** Light singularization for matching (eggs→egg, tomatoes→tomato, berries→berry). */
+function singularizeWord(w: string): string {
+  if (w.length <= 3) return w;
+  if (w.endsWith("ies")) return w.slice(0, -3) + "y";
+  if (w.endsWith("oes")) return w.slice(0, -2);
+  if (w.endsWith("ses") || w.endsWith("xes") || w.endsWith("ches") || w.endsWith("shes"))
+    return w.slice(0, -2);
+  if (w.endsWith("ss")) return w; // glass, molasses
+  if (w.endsWith("s")) return w.slice(0, -1);
+  return w;
+}
+
+/**
+ * Canonical form of an ingredient name, used only as a grouping key for
+ * consolidation. Lowercases, collapses whitespace, drops prep adjectives, and
+ * singularizes each word so the same item written different ways merges.
+ */
+export function canonicalizeIngredientName(name: string): string {
+  const cleaned = name.toLowerCase().trim().replace(/\s+/g, " ");
+  const words = cleaned
+    .split(" ")
+    .filter((w) => w && !NAME_STOP_WORDS.has(w))
+    .map(singularizeWord);
+  const result = words.join(" ").trim();
+  return result || cleaned;
+}
+
+/**
+ * Parse a quantity string into a number, or null if it is empty/unparseable
+ * (e.g. "to taste"). Unlike parseQuantity, does NOT default to 1 — so
+ * unquantified ingredients stay unquantified instead of inflating totals.
+ */
+export function parseQuantityStrict(q: string): number | null {
+  const trimmed = (q ?? "").trim();
+  if (trimmed === "") return null;
+  const mixed = trimmed.match(/^(\d+)\s+(\d+)\/(\d+)$/);
+  if (mixed) return parseInt(mixed[1]) + parseInt(mixed[2]) / parseInt(mixed[3]);
+  const frac = trimmed.match(/^(\d+)\/(\d+)$/);
+  if (frac) return parseInt(frac[1]) / parseInt(frac[2]);
+  const num = parseFloat(trimmed);
+  return isNaN(num) ? null : num;
+}
+
+export interface RawGroceryIngredient {
+  name: string;
+  unit: string;
+  quantity: string;
+  recipeId: string;
+}
+
+export interface ConsolidatedGroceryItem {
+  name: string;
+  quantity: number | null;
+  unit: string | null;
+  recipeIds: string[];
+}
+
+/**
+ * Merge ingredients drawn from many recipes into a deduplicated shopping list.
+ * Items combine when their canonical name AND normalized unit match, summing
+ * quantities across recipes. Items with no quantity stay unquantified rather
+ * than counting as 1.
+ *
+ * Limitation: the same item in *different* units (e.g. "1 cup" + "2 tbsp") is
+ * kept as separate lines — no unit conversion is attempted.
+ */
+export function consolidateIngredients(
+  items: RawGroceryIngredient[]
+): ConsolidatedGroceryItem[] {
+  const groups = new Map<string, {
+    name: string;
+    unit: string | null;
+    qty: number | null;
+    recipeIds: Set<string>;
+  }>();
+
+  for (const item of items) {
+    const displayName = item.name.trim();
+    if (!displayName) continue;
+
+    const canonical = canonicalizeIngredientName(displayName);
+    const unit = normalizeUnit(item.unit || "") || "";
+    const key = `${canonical}|${unit}`;
+    const qty = parseQuantityStrict(item.quantity);
+
+    let group = groups.get(key);
+    if (!group) {
+      group = { name: displayName, unit: unit || null, qty: null, recipeIds: new Set() };
+      groups.set(key, group);
+    }
+
+    group.recipeIds.add(item.recipeId);
+    if (qty !== null) group.qty = (group.qty ?? 0) + qty;
+    // Prefer the shortest original name for display (usually the cleanest base).
+    if (displayName.length < group.name.length) group.name = displayName;
+  }
+
+  return Array.from(groups.values()).map((g) => ({
+    name: g.name,
+    quantity: g.qty,
+    unit: g.unit,
+    recipeIds: Array.from(g.recipeIds),
+  }));
+}
+
 export function categorizeIngredient(name: string): string {
   const lower = name.toLowerCase().trim();
 
