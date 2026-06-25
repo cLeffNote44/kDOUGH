@@ -1,4 +1,5 @@
 const { app, BrowserWindow, shell, dialog } = require("electron");
+const { autoUpdater } = require("electron-updater");
 const { spawn } = require("child_process");
 const path = require("path");
 const fs = require("fs");
@@ -10,6 +11,48 @@ let nextProcess;
 const DEFAULT_PORT = 3847;
 let activePort = DEFAULT_PORT;
 const isDev = !app.isPackaged;
+
+// ============================================
+// AUTO-UPDATE (electron-updater)
+// ============================================
+
+/**
+ * Wire up background auto-update against GitHub Releases. Only meaningful in a
+ * packaged build: in dev (app.isPackaged === false) electron-updater throws, so
+ * we skip it. Every path is catch-guarded so a network/feed failure can never
+ * crash launch. macOS auto-install additionally requires a signed app (Squirrel
+ * refuses unsigned updates); Windows/Linux update without signing.
+ */
+function initAutoUpdater() {
+  if (isDev) return;
+
+  autoUpdater.autoDownload = true; // download newer releases in the background
+  autoUpdater.autoInstallOnAppQuit = true; // apply on next quit
+
+  const log = (msg) => console.log(`[AutoUpdate] ${msg}`);
+  autoUpdater.on("checking-for-update", () => log("Checking for update…"));
+  autoUpdater.on("update-available", (info) =>
+    log(`Update available: ${info?.version ?? "?"}`)
+  );
+  autoUpdater.on("update-not-available", () => log("Up to date."));
+  autoUpdater.on("download-progress", (p) =>
+    log(`Downloading: ${Math.round(p?.percent ?? 0)}%`)
+  );
+  autoUpdater.on("update-downloaded", (info) =>
+    log(`Update ${info?.version ?? "?"} downloaded; will install on quit.`)
+  );
+  autoUpdater.on("error", (err) =>
+    console.error("[AutoUpdate] Error:", err == null ? "unknown" : err)
+  );
+
+  // Checks GH Releases, downloads if newer, and shows an OS notification when the
+  // download completes. Wrapped so a feed/network failure never bubbles up.
+  autoUpdater
+    .checkForUpdatesAndNotify()
+    .catch((err) =>
+      console.error("[AutoUpdate] checkForUpdatesAndNotify failed:", err)
+    );
+}
 
 // ============================================
 // PORT DETECTION
@@ -430,6 +473,10 @@ app.whenReady().then(async () => {
   } else {
     splash.close();
   }
+
+  // Kick off the background update check once a window exists (so the
+  // completion notification has a UI context). No-op in dev / unsigned mac.
+  initAutoUpdater();
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {

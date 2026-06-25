@@ -1,0 +1,58 @@
+name: Release
+
+# Build, sign (when certs are present), and publish the Electron desktop apps to
+# a GitHub Release whenever a v* tag is pushed. Each matrix leg builds only its
+# host OS's native targets and publishes into the single release for the tag.
+on:
+  push:
+    tags:
+      - "v*"
+
+# electron-builder's GitHub publisher needs write access to Releases.
+permissions:
+  contents: write
+
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest    # builds + (if certs present) signs + notarizes mac
+          - os: windows-latest  # builds nsis
+          - os: ubuntu-latest   # builds AppImage
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install dependencies
+        working-directory: app
+        run: npm ci
+
+      - name: Build & publish Electron app
+        working-directory: app
+        # No --mac/--win/--linux flags: electron-builder builds the host OS's
+        # targets. When a signing secret is unset its env var is empty and that
+        # platform builds UNSIGNED rather than failing.
+        run: npx electron-builder --publish always
+        env:
+          # GitHub Releases publish (built-in token is sufficient).
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          # ---- macOS signing + notarization (used only on macos-latest) ----
+          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+          # ---- Windows Authenticode (used only on windows-latest) ----
+          WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
