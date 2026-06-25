@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getMonday, toDateString } from "@/lib/dates";
 import WeeklyCalendar from "@/components/calendar/WeeklyCalendar";
 import StatsCards from "@/components/dashboard/StatsCards";
+import type { MealPlan } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +61,9 @@ export default async function HomePage({
     })(),
   ]);
 
-  const mealPlans = mealPlansResult.data ?? [];
+  // Boundary cast: DB types meal_type as plain string + ingredients as Json; the
+  // app's MealPlan view-model narrows these (meal_type union, Ingredient[]).
+  const mealPlans = (mealPlansResult.data ?? []) as unknown as MealPlan[];
   const recipeCount = recipesResult.count ?? 0;
   const groceryRemaining = groceryResult.count ?? 0;
 

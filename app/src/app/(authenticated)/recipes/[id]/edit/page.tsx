@@ -46,7 +46,7 @@ export default async function EditRecipePage({
         <h1 className="text-xl font-semibold">Edit Recipe</h1>
       </div>
       <RecipeForm
-        recipe={recipe as Recipe}
+        recipe={recipe as unknown as Recipe}
         action={boundUpdate}
         submitLabel="Update Recipe"
       />

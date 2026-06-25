@@ -31,7 +31,7 @@ export default function RecipePicker({ date, dayLabel, mealType, onClose }: Reci
           .select("*")
           .order("title");
         if (error) throw error;
-        setRecipes((data as Recipe[]) ?? []);
+        setRecipes((data as unknown as Recipe[]) ?? []);
       } catch {
         toast.error("Failed to load recipes");
       } finally {
