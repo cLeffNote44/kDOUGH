@@ -11,8 +11,13 @@ const required = [
   "NEXT_PUBLIC_SUPABASE_ANON_KEY",
 ] as const;
 
-// Optional but recommended for scraper
-const optional = ["SCRAPER_TIMEOUT_MS", "ANTHROPIC_API_KEY"] as const;
+// Optional but recommended for scraper + observability
+const optional = [
+  "SCRAPER_TIMEOUT_MS",
+  "ANTHROPIC_API_KEY",
+  "NEXT_PUBLIC_SENTRY_DSN",
+  "SENTRY_DSN",
+] as const;
 void optional; // documented for reference; not validated (all optional)
 
 // Skip the hard fail during `next build` (no runtime env is available while
