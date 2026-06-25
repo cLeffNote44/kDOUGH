@@ -42,6 +42,8 @@ Non-obvious choices and the reasoning behind them. Updated as decisions are made
 
 **Trade-off:** If the app ever needs to support multiple users, significant refactoring will be required. That's an acceptable future cost — build for the actual use case today.
 
+**Update (post open-source release):** the app still targets a single household per account, but it is NOT "no user scoping." Every table enforces per-user Row Level Security and every server action filters by `user_id`. Treat that owner-scoping as a hard invariant — do not write queries or policies that assume a single global user.
+
 ---
 
 ## 005 — Five meal slots per day, all visible

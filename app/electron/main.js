@@ -130,6 +130,24 @@ function resolveStandalonePaths() {
 // NEXT.JS SERVER MANAGEMENT
 // ============================================
 
+/**
+ * Read optional user configuration (e.g. an Anthropic API key) from a JSON file
+ * in the OS app-data directory, so the packaged app can enable AI features
+ * without baking secrets into the binary. Returns {} if absent/unreadable.
+ *   macOS: ~/Library/Application Support/kDOUGH/config.json
+ */
+function loadUserConfig() {
+  try {
+    const cfgPath = path.join(app.getPath("userData"), "config.json");
+    if (fs.existsSync(cfgPath)) {
+      return JSON.parse(fs.readFileSync(cfgPath, "utf8")) || {};
+    }
+  } catch (err) {
+    console.warn("[Electron] Could not read user config:", err);
+  }
+  return {};
+}
+
 function startNextServer() {
   if (isDev) {
     // In development, use `next dev`
@@ -153,6 +171,14 @@ function startNextServer() {
       return;
     }
 
+    // ANTHROPIC_API_KEY is a runtime (non-NEXT_PUBLIC_) var that Next.js never
+    // inlines, so the packaged app has no key unless we supply one. Read it from
+    // a user config file (and fall back to the build/launch environment) so AI
+    // import works in the shipped binary.
+    const userConfig = loadUserConfig();
+    const anthropicKey =
+      process.env.ANTHROPIC_API_KEY || userConfig.ANTHROPIC_API_KEY;
+
     nextProcess = spawn(process.execPath, ["--no-warnings", serverPath], {
       cwd: standalonePath,
       // Make the child its own process-group leader so killNextProcess can
@@ -164,6 +190,7 @@ function startNextServer() {
         HOSTNAME: "localhost",
         // Electron sets this; Next.js standalone needs it unset to run as plain Node
         ELECTRON_RUN_AS_NODE: "1",
+        ...(anthropicKey ? { ANTHROPIC_API_KEY: anthropicKey } : {}),
       },
     });
   }
