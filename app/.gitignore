@@ -17,10 +17,8 @@
 /.next/
 /out/
 
-# production
-/build
-
-# electron-builder output
+# electron-builder output (build/ holds committed Electron resources:
+# icons + entitlements, referenced by package.json build config)
 /dist
 
 # misc
