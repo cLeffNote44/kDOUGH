@@ -4,7 +4,7 @@
   "description": "Plan meals, generate grocery lists, shop smarter.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f1f5f9",
+  "background_color": "#e2e8f0",
   "theme_color": "#14b8a6",
   "icons": [
     {
