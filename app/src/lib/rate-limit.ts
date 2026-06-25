@@ -11,6 +11,9 @@
 
 interface RateLimitEntry {
   timestamps: number[];
+  /** The window this bucket was configured with, so cleanup prunes each entry
+   *  by its OWN window rather than whichever caller happened to trigger it. */
+  windowMs: number;
 }
 
 const store = new Map<string, RateLimitEntry>();
@@ -19,13 +22,13 @@ const store = new Map<string, RateLimitEntry>();
 const CLEANUP_INTERVAL = 5 * 60 * 1000;
 let lastCleanup = Date.now();
 
-function cleanup(windowMs: number) {
+function cleanup() {
   const now = Date.now();
   if (now - lastCleanup < CLEANUP_INTERVAL) return;
   lastCleanup = now;
 
-  const cutoff = now - windowMs;
   for (const [key, entry] of store) {
+    const cutoff = now - entry.windowMs;
     entry.timestamps = entry.timestamps.filter((t) => t > cutoff);
     if (entry.timestamps.length === 0) {
       store.delete(key);
@@ -61,13 +64,15 @@ export function checkRateLimit(
   const cutoff = now - config.windowMs;
 
   // Run periodic cleanup
-  cleanup(config.windowMs);
+  cleanup();
 
-  // Get or create entry
+  // Get or create entry, tracking the window this bucket uses.
   let entry = store.get(key);
   if (!entry) {
-    entry = { timestamps: [] };
+    entry = { timestamps: [], windowMs: config.windowMs };
     store.set(key, entry);
+  } else {
+    entry.windowMs = config.windowMs;
   }
 
   // Remove expired timestamps

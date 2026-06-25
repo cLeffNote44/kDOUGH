@@ -34,11 +34,15 @@ describe("parseDuration", () => {
     ["PT1H", 60],
     ["PT1H30M", 90],
     ["PT2H15M", 135],
+    ["P1D", 1440], // day component (e.g. a long marinade)
+    ["P1DT2H", 1560], // days + hours
+    ["PT1H30M45S", 91], // seconds rounded to the nearest minute
+    ["PT45S", 1], // sub-minute rounds up
   ])("parses %s -> %i", (iso, expected) => {
     expect(parseDuration(iso)).toBe(expected);
   });
 
-  it.each(["PT0M", undefined, null, "not a duration", ""])(
+  it.each(["PT0M", "P", undefined, null, "not a duration", ""])(
     "returns null for %s",
     (iso) => {
       expect(parseDuration(iso as string | null | undefined)).toBeNull();
@@ -125,6 +129,23 @@ describe("extractFromJsonLd", () => {
     const recipe = extractFromJsonLd($, "https://src.test");
     expect(recipe!.title).toBe("Carbonara");
     expect(recipe!.ingredients).toHaveLength(3);
+  });
+
+  it("flattens HowToSection instructions (itemListElement)", () => {
+    const $ = cheerio.load(`<html><head>
+      <script type="application/ld+json">
+      {"@type":"Recipe","name":"Sectioned","recipeIngredient":["a"],
+       "recipeInstructions":[
+         {"@type":"HowToSection","name":"Prep","itemListElement":[
+           {"@type":"HowToStep","text":"Chop onions"},
+           {"@type":"HowToStep","text":"Mince garlic"}]},
+         {"@type":"HowToSection","name":"Cook","itemListElement":[
+           {"@type":"HowToStep","text":"Saute"}]}]}
+      </script></head><body></body></html>`);
+    const recipe = extractFromJsonLd($, "https://src.test");
+    expect(recipe!.instructions).toContain("1. Chop onions");
+    expect(recipe!.instructions).toContain("2. Mince garlic");
+    expect(recipe!.instructions).toContain("3. Saute");
   });
 
   it("sanitizes a javascript: image URL out of JSON-LD", () => {

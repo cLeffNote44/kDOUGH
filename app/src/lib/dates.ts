@@ -7,22 +7,20 @@
  */
 
 /**
- * Get the Monday of a given week.
+ * Get the Monday of the week containing a given date.
  *
- * @param dateStr - An ISO date string (e.g. "2025-03-03"). If provided,
- *   it's assumed to already represent a Monday (used for week navigation).
- *   If omitted, returns the Monday of the current week.
+ * @param dateStr - An ISO date string (e.g. "2025-03-03"). Any day of the week
+ *   is normalized to the Monday of its week, so the result is idempotent and a
+ *   stale/shared `?week=` param pointing at a non-Monday can't desync the
+ *   calendar from the grocery list. If omitted, uses today.
  * @returns A Date object set to midnight local time on the Monday.
  */
 export function getMonday(dateStr?: string): Date {
-  if (dateStr) {
-    return new Date(dateStr + "T00:00:00");
-  }
-
-  const today = new Date();
-  const day = today.getDay(); // 0 = Sunday, 1 = Monday, ...
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1));
+  const base = dateStr ? new Date(dateStr + "T00:00:00") : new Date();
+  const day = base.getDay(); // 0 = Sunday, 1 = Monday, ...
+  const monday = new Date(base);
+  monday.setDate(base.getDate() - (day === 0 ? 6 : day - 1));
+  monday.setHours(0, 0, 0, 0);
   return monday;
 }
 

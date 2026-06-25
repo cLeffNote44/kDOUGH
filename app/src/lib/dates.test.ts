@@ -17,6 +17,15 @@ describe("getMonday", () => {
     expect(result.getSeconds()).toBe(0);
   });
 
+  it("snaps a non-Monday date string back to its week's Monday (idempotent)", () => {
+    // 2025-06-25 is a Wednesday; its week's Monday is 2025-06-23.
+    const wed = getMonday("2025-06-25");
+    expect(wed.getDay()).toBe(1);
+    expect(toDateString(wed)).toBe("2025-06-23");
+    // Idempotent: feeding the result back yields the same Monday.
+    expect(toDateString(getMonday(toDateString(wed)))).toBe("2025-06-23");
+  });
+
   it("returns the Monday of the current week when no arg is given", () => {
     const result = getMonday();
     const day = result.getDay();

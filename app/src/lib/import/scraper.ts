@@ -27,15 +27,23 @@ export interface ScrapedRecipe {
 }
 
 /**
- * Parse ISO 8601 duration (PT30M, PT1H30M, etc.) to minutes.
+ * Parse an ISO 8601 duration (PT30M, PT1H30M, P1DT2H, PT45S, …) to minutes.
+ * Handles day and second components (e.g. long marinades use P..D); seconds are
+ * rounded to the nearest minute. Returns null when nothing parsed or the total
+ * is zero (treated as "unspecified").
  */
 export function parseDuration(iso: string | undefined | null): number | null {
   if (!iso || typeof iso !== "string") return null;
-  const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
-  if (!match) return null;
-  const hours = parseInt(match[1] || "0");
-  const minutes = parseInt(match[2] || "0");
-  return hours * 60 + minutes || null;
+  const m = iso
+    .trim()
+    .match(/^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/i);
+  if (!m || (!m[1] && !m[2] && !m[3] && !m[4])) return null;
+  const days = parseInt(m[1] || "0", 10);
+  const hours = parseInt(m[2] || "0", 10);
+  const minutes = parseInt(m[3] || "0", 10);
+  const seconds = parseInt(m[4] || "0", 10);
+  const total = days * 1440 + hours * 60 + minutes + Math.round(seconds / 60);
+  return total > 0 ? total : null;
 }
 
 /**
@@ -103,20 +111,39 @@ export function extractFromJsonLd($: cheerio.CheerioAPI, url: string): ScrapedRe
         parseIngredientLine(stripHtml(raw))
       );
 
-      // Extract instructions
+      // Extract instructions. Flatten HowToSection groups (whose steps live in
+      // `itemListElement`) so sectioned recipes don't lose their steps.
       let instructions = "";
       if (typeof recipe.recipeInstructions === "string") {
         instructions = stripHtml(recipe.recipeInstructions);
       } else if (Array.isArray(recipe.recipeInstructions)) {
-        instructions = recipe.recipeInstructions
-          .map((step: string | Record<string, string>, idx: number) => {
-            if (typeof step === "string") return `${idx + 1}. ${stripHtml(step)}`;
-            if (step.text) return `${idx + 1}. ${stripHtml(step.text)}`;
-            if (step.name) return `${idx + 1}. ${stripHtml(step.name)}`;
-            return "";
-          })
-          .filter(Boolean)
-          .join("\n\n");
+        const flatSteps: string[] = [];
+        const collect = (items: unknown[]) => {
+          for (const step of items) {
+            if (typeof step === "string") {
+              const t = stripHtml(step);
+              if (t) flatSteps.push(t);
+              continue;
+            }
+            if (step && typeof step === "object") {
+              const s = step as Record<string, unknown>;
+              if (Array.isArray(s.itemListElement)) {
+                collect(s.itemListElement);
+                continue;
+              }
+              const raw =
+                typeof s.text === "string"
+                  ? s.text
+                  : typeof s.name === "string"
+                    ? s.name
+                    : "";
+              const t = stripHtml(raw);
+              if (t) flatSteps.push(t);
+            }
+          }
+        };
+        collect(recipe.recipeInstructions);
+        instructions = flatSteps.map((t, i) => `${i + 1}. ${t}`).join("\n\n");
       }
 
       // Extract image (sanitize to prevent javascript:/data: injection)
