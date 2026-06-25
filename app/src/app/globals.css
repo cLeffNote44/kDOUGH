@@ -12,6 +12,19 @@ body {
   overscroll-behavior-y: contain;
 }
 
+/* Respect reduced-motion: neutralize animations/transitions for users who
+   request it (WCAG 2.3.3 — spinners, hover transforms, page fades). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ── Glass morphism utilities ─────────────────── */
 
 .glass {
