@@ -47,6 +47,7 @@ export default async function EditRecipePage({
       </div>
       <RecipeForm
         recipe={recipe as unknown as Recipe}
+        userId={user.id}
         action={boundUpdate}
         submitLabel="Update Recipe"
       />

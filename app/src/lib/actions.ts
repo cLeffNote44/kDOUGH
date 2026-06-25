@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { Ingredient, GroceryItem, PantryItem } from "@/types";
 import { categorizeIngredient } from "@/lib/import/parser";
+import { resolveRecipeImageUrl } from "@/lib/recipe-images";
 import {
   aggregateMealPlanIngredients,
   type MealPlanWithRecipe,
@@ -78,10 +79,17 @@ export async function createRecipe(formData: FormData) {
     return { error: msg };
   }
 
+  const image_url = await resolveRecipeImageUrl(
+    supabase,
+    user.id,
+    formData.get("image_url") as string | null
+  );
+
   const { data, error } = await supabase
     .from("recipes")
     .insert({
       user_id: user.id,
+      image_url,
       title: parsed.data.title,
       description: parsed.data.description || null,
       ingredients: parsed.data.ingredients,
@@ -145,9 +153,16 @@ export async function updateRecipe(id: string, formData: FormData) {
     return { error: msg };
   }
 
+  const image_url = await resolveRecipeImageUrl(
+    supabase,
+    user.id,
+    formData.get("image_url") as string | null
+  );
+
   const { error } = await supabase
     .from("recipes")
     .update({
+      image_url,
       title: parsed.data.title,
       description: parsed.data.description || null,
       ingredients: parsed.data.ingredients,
@@ -227,6 +242,7 @@ export async function saveImportedRecipe(recipe: {
   const { supabase, user } = auth;
 
   const r = parsed.data;
+  const image_url = await resolveRecipeImageUrl(supabase, user.id, r.image_url);
   const { data, error } = await supabase
     .from("recipes")
     .insert({
@@ -235,7 +251,7 @@ export async function saveImportedRecipe(recipe: {
       description: r.description || null,
       ingredients: r.ingredients,
       instructions: r.instructions || null,
-      image_url: r.image_url || null,
+      image_url,
       source_url: r.source_url || null,
       servings: r.servings,
       prep_time: r.prep_time,
