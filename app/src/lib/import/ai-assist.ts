@@ -19,7 +19,7 @@ import type { ScrapedRecipe } from "./scraper";
 // Current Sonnet alias. The previously-pinned "claude-sonnet-4-20250514"
 // snapshot retired 2026-06-15 (requests now 404), which silently broke both
 // the URL AI-fallback and photo OCR. Defined once so future bumps touch one line.
-const RECIPE_MODEL = "claude-sonnet-4-6";
+export const RECIPE_MODEL = "claude-sonnet-4-6";
 // Cheaper/faster fallback tried only when the primary model errors (e.g. an
 // overload/529 the SDK couldn't ride out) — not on a clean "no recipe found".
 const FALLBACK_MODEL = "claude-haiku-4-5";
@@ -329,4 +329,9 @@ export async function aiExtractFromImage(
  */
 export function isAiAvailable(): boolean {
   return !!process.env.ANTHROPIC_API_KEY;
+}
+
+/** Shared, memoized Anthropic client for other AI features (e.g. week planning). */
+export function getAnthropicClient(): Anthropic | null {
+  return getClient();
 }

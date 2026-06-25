@@ -9,6 +9,8 @@ import {
   aggregateMealPlanIngredients,
   type MealPlanWithRecipe,
 } from "@/lib/grocery-aggregate";
+import { isAiAvailable, getAnthropicClient } from "@/lib/import/ai-assist";
+import { generateWeekPlan, type PlanRecipe } from "@/lib/meal-plan-ai";
 import {
   recipeFormSchema,
   importedRecipeSchema,
@@ -736,4 +738,105 @@ export async function removePantryItem(itemId: string) {
   revalidatePath("/pantry");
   revalidatePath("/grocery");
   return { success: true };
+}
+
+// ============================================
+// AI WEEK PLANNER
+// ============================================
+
+/**
+ * Fill the week's EMPTY dinner slots with distinct recipes chosen by Claude from
+ * the user's own library. Never overwrites an already-planned dinner, and only
+ * assigns recipes the user actually owns.
+ */
+export async function planMyWeek(weekStart: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(weekStart)) {
+    return { error: "Invalid week" };
+  }
+
+  const auth = await requireAuth();
+  if (auth.error) return { error: auth.error };
+  const { supabase, user } = auth;
+
+  if (!isAiAvailable()) {
+    return { error: "AI planning needs an Anthropic API key to be configured." };
+  }
+  const client = getAnthropicClient();
+  if (!client) return { error: "AI planning is currently unavailable." };
+
+  // Library
+  const { data: recipeRows } = await supabase
+    .from("recipes")
+    .select("id, title, tags, is_favorite")
+    .eq("user_id", user.id);
+  const library = recipeRows ?? [];
+  if (library.length === 0) {
+    return { error: "Add some recipes first, then I can plan your week." };
+  }
+
+  // Which dinner days are still empty?
+  const monday = new Date(weekStart + "T00:00:00");
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const sundayStr = `${sunday.getFullYear()}-${String(sunday.getMonth() + 1).padStart(2, "0")}-${String(sunday.getDate()).padStart(2, "0")}`;
+
+  const { data: existing } = await supabase
+    .from("meal_plans")
+    .select("date")
+    .eq("user_id", user.id)
+    .eq("meal_type", "dinner")
+    .gte("date", weekStart)
+    .lte("date", sundayStr);
+  const filled = new Set((existing ?? []).map((e) => e.date));
+
+  const dayDates: string[] = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  });
+  const emptyDayIndices = dayDates
+    .map((date, i) => ({ date, i }))
+    .filter((x) => !filled.has(x.date));
+
+  if (emptyDayIndices.length === 0) {
+    return { error: "Every dinner this week is already planned." };
+  }
+
+  const planRecipes: PlanRecipe[] = library.map((r) => ({
+    id: r.id,
+    title: r.title,
+    tags: Array.isArray(r.tags) ? r.tags : [],
+    favorite: !!r.is_favorite,
+  }));
+
+  const entries = await generateWeekPlan(
+    client,
+    planRecipes,
+    emptyDayIndices.map((x) => x.i)
+  );
+  if (!entries || entries.length === 0) {
+    return { error: "Couldn't generate a plan. Please try again." };
+  }
+
+  // Assign — only into empty days, and only recipes the user owns.
+  const ownedIds = new Set(library.map((r) => r.id));
+  let assigned = 0;
+  for (const entry of entries) {
+    const slot = emptyDayIndices.find((x) => x.i === entry.dayIndex);
+    if (!slot || !ownedIds.has(entry.recipeId)) continue;
+    const res = await upsertMealPlanSlot(
+      supabase,
+      user.id,
+      entry.recipeId,
+      slot.date,
+      "dinner"
+    );
+    if (!res.error) assigned++;
+  }
+
+  revalidatePath("/");
+  if (assigned === 0) {
+    return { error: "Couldn't assign any meals. Please try again." };
+  }
+  return { success: true, assigned };
 }

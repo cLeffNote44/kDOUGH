@@ -3,7 +3,7 @@
 import { useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { removeRecipeFromDay, moveRecipeToSlot } from "@/lib/actions";
+import { removeRecipeFromDay, moveRecipeToSlot, planMyWeek } from "@/lib/actions";
 import { toDateString } from "@/lib/dates";
 import type { MealPlan } from "@/types";
 import { DAYS, MEAL_TYPES } from "./meal-types";
@@ -42,9 +42,25 @@ export default function WeeklyCalendar({ mealPlans, weekStart, isCurrentWeek }: 
 
   const router = useRouter();
 
+  const [planning, setPlanning] = useState(false);
+
   // Focus trap + Escape-to-close for the inline remove-confirm dialog.
   const confirmDialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(confirmDialogRef, () => setConfirmRemove(null), !!confirmRemove);
+
+  const handlePlanWeek = async () => {
+    setPlanning(true);
+    const res = await planMyWeek(weekStart);
+    setPlanning(false);
+    if (res?.error) {
+      toast.error(res.error);
+      return;
+    }
+    toast.success(
+      `Planned ${res.assigned} dinner${res.assigned === 1 ? "" : "s"} for the week`
+    );
+    router.refresh();
+  };
 
   // Build planMap: date → meal_type → plan (memoized — rebuilt only when the
   // week's meal plans change, not on every hover/drag/expand state change).
@@ -216,6 +232,17 @@ export default function WeeklyCalendar({ mealPlans, weekStart, isCurrentWeek }: 
 
       {/* C11: Week summary bar */}
       <WeekSummaryBar mealPlans={mealPlans} />
+
+      {/* AI week planner */}
+      <div className="flex justify-center mb-4">
+        <button
+          onClick={handlePlanWeek}
+          disabled={planning}
+          className="px-4 py-2 text-sm font-medium rounded-lg btn-gradient disabled:opacity-60 flex items-center gap-1.5"
+        >
+          {planning ? "Planning…" : "✨ Plan my week"}
+        </button>
+      </div>
 
       {/* Empty week CTA */}
       {mealPlans.length === 0 && (
