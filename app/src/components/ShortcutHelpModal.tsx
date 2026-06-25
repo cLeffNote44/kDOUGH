@@ -36,16 +36,16 @@ export default function ShortcutHelpModal({ onClose }: { onClose: () => void }) 
         role="dialog"
         aria-modal="true"
         aria-labelledby="shortcut-help-title"
-        className="glass-strong rounded-xl shadow-lg w-full max-w-xs mx-4 border border-stone-200/60 dark:border-stone-700/40"
+        className="glass-strong rounded-xl shadow-lg w-full max-w-xs mx-4 border border-slate-200/60 dark:border-slate-700/40"
       >
-        <div className="p-4 border-b border-stone-200/60 dark:border-stone-700/40 flex items-center justify-between">
-          <h2 id="shortcut-help-title" className="font-display font-semibold text-stone-900 dark:text-stone-100 text-sm">
+        <div className="p-4 border-b border-slate-200/60 dark:border-slate-700/40 flex items-center justify-between">
+          <h2 id="shortcut-help-title" className="font-display font-semibold text-slate-900 dark:text-slate-100 text-sm">
             Keyboard Shortcuts
           </h2>
           <button
             onClick={onClose}
             aria-label="Close shortcuts"
-            className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 text-xl leading-none"
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-xl leading-none"
           >
             &times;
           </button>
@@ -53,10 +53,10 @@ export default function ShortcutHelpModal({ onClose }: { onClose: () => void }) 
         <div className="p-4 space-y-2.5">
           {SHORTCUTS.map(({ key, description }) => (
             <div key={key} className="flex items-center justify-between">
-              <span className="text-sm text-stone-600 dark:text-stone-400">
+              <span className="text-sm text-slate-600 dark:text-slate-400">
                 {description}
               </span>
-              <kbd className="px-2 py-0.5 text-xs font-mono bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded border border-stone-200 dark:border-stone-700">
+              <kbd className="px-2 py-0.5 text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded border border-slate-200 dark:border-slate-700">
                 {key}
               </kbd>
             </div>

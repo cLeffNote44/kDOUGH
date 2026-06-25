@@ -18,7 +18,7 @@ export default function BottomTabBar() {
   );
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 md:hidden z-40 glass-strong border-t border-stone-200/60 dark:border-stone-700/40 pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed bottom-0 inset-x-0 md:hidden z-40 glass-strong border-t border-slate-200/60 dark:border-slate-700/40 pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center justify-around h-14">
         {NAV_LINKS.map((link) => {
           const isActive =
@@ -32,8 +32,8 @@ export default function BottomTabBar() {
               onClick={() => navigate(link.href)}
               className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors ${
                 isActive
-                  ? "text-amber-600 dark:text-amber-400"
-                  : "text-stone-400 dark:text-stone-500"
+                  ? "text-teal-600 dark:text-teal-400"
+                  : "text-slate-400 dark:text-slate-500"
               }`}
             >
               <NavIconSvg name={link.icon} />

@@ -67,13 +67,13 @@ export default function AddItemForm({
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Add an item (e.g. paper towels)"
-        className="flex-1 px-4 py-2.5 text-sm border border-stone-200 dark:border-stone-700 rounded-lg bg-white/80 dark:bg-stone-800/80 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+        className="flex-1 px-4 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
         disabled={isPending}
       />
       <button
         type="submit"
         disabled={isPending || !name.trim()}
-        className="px-4 py-2.5 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Add
       </button>

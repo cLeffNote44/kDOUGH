@@ -24,7 +24,7 @@ export default function OfflineIndicator() {
   if (!isOffline) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[70] bg-amber-500 text-white text-center py-1.5 text-xs font-medium shadow-sm">
+    <div className="fixed top-0 left-0 right-0 z-[70] bg-teal-500 text-white text-center py-1.5 text-xs font-medium shadow-sm">
       <svg
         className="inline-block w-3.5 h-3.5 mr-1 -mt-0.5"
         fill="none"

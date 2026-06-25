@@ -10,7 +10,7 @@ const STEPS = [
       "Your personal meal planner and grocery list generator. Let's take a quick look around.",
     illustration: (
       <svg
-        className="w-24 h-24 text-amber-500"
+        className="w-24 h-24 text-teal-500"
         viewBox="0 0 96 96"
         fill="none"
         stroke="currentColor"
@@ -26,7 +26,7 @@ const STEPS = [
         {/* Heart */}
         <path
           d="M44 42c-1-2-4-3-5-1s0 5 5 8c5-3 6-6 5-8s-4-1-5 1"
-          className="text-amber-400"
+          className="text-teal-400"
           strokeWidth="1.2"
         />
         {/* Steam */}
@@ -42,7 +42,7 @@ const STEPS = [
       "Tap any empty meal slot to add a recipe. Tap a planned meal to move, change, or remove it — and drag-and-drop works too on desktop.",
     illustration: (
       <svg
-        className="w-24 h-24 text-amber-500"
+        className="w-24 h-24 text-teal-500"
         viewBox="0 0 96 96"
         fill="none"
         stroke="currentColor"
@@ -72,7 +72,7 @@ const STEPS = [
           width="14"
           height="6"
           rx="1.5"
-          className="text-amber-400"
+          className="text-teal-400"
           opacity="0.5"
           fill="currentColor"
           stroke="none"
@@ -86,7 +86,7 @@ const STEPS = [
       "Generate grocery lists from your meal plan. Items are auto-categorized by aisle for faster shopping.",
     illustration: (
       <svg
-        className="w-24 h-24 text-amber-500"
+        className="w-24 h-24 text-teal-500"
         viewBox="0 0 96 96"
         fill="none"
         stroke="currentColor"
@@ -100,7 +100,7 @@ const STEPS = [
         <path d="M36 36v-6a12 12 0 0124 0v6" />
         {/* Items peeking out */}
         <circle cx="38" cy="50" r="4" className="text-emerald-400" opacity="0.6" />
-        <circle cx="52" cy="46" r="3" className="text-orange-400" opacity="0.6" />
+        <circle cx="52" cy="46" r="3" className="text-teal-400" opacity="0.6" />
         <path d="M44 52l4-8 4 8" className="text-emerald-500" opacity="0.5" />
         {/* Checklist overlay */}
         <path d="M56 56h10M56 62h8M56 68h10" opacity="0.4" />
@@ -142,7 +142,7 @@ export default function OnboardingModal() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="onboarding-title"
-        className="glass-strong rounded-2xl shadow-lg w-full max-w-sm mx-4 p-6 border border-stone-200/60 dark:border-stone-700/40 text-center"
+        className="glass-strong rounded-2xl shadow-lg w-full max-w-sm mx-4 p-6 border border-slate-200/60 dark:border-slate-700/40 text-center"
       >
         {/* Step dots */}
         <div className="flex justify-center gap-2 mb-6">
@@ -151,8 +151,8 @@ export default function OnboardingModal() {
               key={i}
               className={`w-2 h-2 rounded-full transition-colors ${
                 i === step
-                  ? "bg-amber-500"
-                  : "bg-stone-300 dark:bg-stone-600"
+                  ? "bg-teal-500"
+                  : "bg-slate-300 dark:bg-slate-600"
               }`}
             />
           ))}
@@ -164,10 +164,10 @@ export default function OnboardingModal() {
         </div>
 
         {/* Title & description */}
-        <h2 id="onboarding-title" className="font-display font-semibold text-lg text-stone-900 dark:text-stone-100 mb-2">
+        <h2 id="onboarding-title" className="font-display font-semibold text-lg text-slate-900 dark:text-slate-100 mb-2">
           {STEPS[step].title}
         </h2>
-        <p className="text-sm text-stone-500 dark:text-stone-400 mb-6 leading-relaxed">
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
           {STEPS[step].description}
         </p>
 
@@ -176,7 +176,7 @@ export default function OnboardingModal() {
           {step > 0 && (
             <button
               onClick={() => setStep(step - 1)}
-              className="px-4 py-2 text-sm text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 transition-colors"
+              className="px-4 py-2 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
             >
               Back
             </button>
@@ -202,7 +202,7 @@ export default function OnboardingModal() {
         {step < STEPS.length - 1 && (
           <button
             onClick={handleComplete}
-            className="mt-4 text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
+            className="mt-4 text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
           >
             Skip tour
           </button>

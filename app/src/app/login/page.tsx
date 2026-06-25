@@ -102,10 +102,10 @@ export default function LoginPage() {
   };
 
   const inputClasses =
-    "w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white/80 dark:bg-stone-800/80 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500";
+    "w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white/80 dark:bg-slate-800/80 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-stone-50 dark:bg-stone-950">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
       <div className="w-full max-w-sm mx-auto p-8">
         <div className="text-center mb-8">
           <img
@@ -113,10 +113,10 @@ export default function LoginPage() {
             alt="kDOUGH"
             width={80}
             height={80}
-            className="w-20 h-20 mx-auto mb-3 rounded-2xl bg-stone-100 dark:bg-stone-800"
+            className="w-20 h-20 mx-auto mb-3 rounded-2xl bg-slate-100 dark:bg-slate-800"
           />
-          <h1 className="text-2xl font-display font-semibold text-stone-900 dark:text-stone-100">kDOUGH</h1>
-          <p className="text-stone-500 dark:text-stone-400 mt-1">Meal planning, simplified</p>
+          <h1 className="text-2xl font-display font-semibold text-slate-900 dark:text-slate-100">kDOUGH</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Meal planning, simplified</p>
         </div>
 
         {signUpSuccess ? (
@@ -126,7 +126,7 @@ export default function LoginPage() {
               We sent a confirmation link to <strong>{email}</strong>. Click it
               to activate your account.
             </p>
-            <p className="text-stone-500 dark:text-stone-400 text-xs mt-4">
+            <p className="text-slate-500 dark:text-slate-400 text-xs mt-4">
               Didn&apos;t receive it? Check your spam folder, or{" "}
               <button
                 onClick={() => {
@@ -134,7 +134,7 @@ export default function LoginPage() {
                   setSignUpSuccess(false);
                   setIsForgotPassword(true);
                 }}
-                className="text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 font-medium"
+                className="text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 font-medium"
               >
                 reset your password
               </button>{" "}
@@ -145,7 +145,7 @@ export default function LoginPage() {
                 setIsSignUp(false);
                 setSignUpSuccess(false);
               }}
-              className="mt-4 text-sm text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 font-medium"
+              className="mt-4 text-sm text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 font-medium"
             >
               Back to sign in
             </button>
@@ -162,14 +162,14 @@ export default function LoginPage() {
                 setIsForgotPassword(false);
                 setResetEmailSent(false);
               }}
-              className="mt-4 text-sm text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 font-medium"
+              className="mt-4 text-sm text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 font-medium"
             >
               Back to sign in
             </button>
           </div>
         ) : isForgotPassword ? (
           <form onSubmit={handleForgotPassword} className="space-y-4">
-            <p className="text-sm text-stone-600 dark:text-stone-400 text-center">
+            <p className="text-sm text-slate-600 dark:text-slate-400 text-center">
               Enter your email and we&apos;ll send you a link to reset your
               password.
             </p>
@@ -177,7 +177,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
               >
                 Email
               </label>
@@ -202,7 +202,7 @@ export default function LoginPage() {
               {loading ? "Sending..." : "Send reset link"}
             </button>
 
-            <p className="text-center text-sm text-stone-500 dark:text-stone-400">
+            <p className="text-center text-sm text-slate-500 dark:text-slate-400">
               Remember your password?{" "}
               <button
                 type="button"
@@ -210,7 +210,7 @@ export default function LoginPage() {
                   setIsForgotPassword(false);
                   setError(null);
                 }}
-                className="text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 font-medium"
+                className="text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 font-medium"
               >
                 Sign in
               </button>
@@ -221,7 +221,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
               >
                 Email
               </label>
@@ -240,7 +240,7 @@ export default function LoginPage() {
               <div className="flex items-center justify-between mb-1">
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-stone-700 dark:text-stone-300"
+                  className="block text-sm font-medium text-slate-700 dark:text-slate-300"
                 >
                   Password
                 </label>
@@ -251,7 +251,7 @@ export default function LoginPage() {
                       setIsForgotPassword(true);
                       setError(null);
                     }}
-                    className="text-xs text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 font-medium"
+                    className="text-xs text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 font-medium"
                   >
                     Forgot password?
                   </button>
@@ -271,7 +271,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -289,12 +289,12 @@ export default function LoginPage() {
               </div>
               {isSignUp && password.length > 0 && (
                 <div className="mt-2">
-                  <div className="h-1.5 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-300 ${passwordStrength.color} ${passwordStrength.width}`}
                     />
                   </div>
-                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                     Password strength:{" "}
                     <span className="font-medium">{passwordStrength.label}</span>
                   </p>
@@ -308,9 +308,9 @@ export default function LoginPage() {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded border-stone-300 dark:border-stone-600 text-amber-600 focus:ring-amber-500"
+                  className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-teal-600 focus:ring-teal-500"
                 />
-                <span className="text-sm text-stone-600 dark:text-stone-400">Remember me</span>
+                <span className="text-sm text-slate-600 dark:text-slate-400">Remember me</span>
               </label>
             )}
 
@@ -330,7 +330,7 @@ export default function LoginPage() {
                   : "Sign in"}
             </button>
 
-            <p className="text-center text-sm text-stone-500 dark:text-stone-400">
+            <p className="text-center text-sm text-slate-500 dark:text-slate-400">
               {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
               <button
                 type="button"
@@ -338,7 +338,7 @@ export default function LoginPage() {
                   setIsSignUp(!isSignUp);
                   setError(null);
                 }}
-                className="text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 font-medium"
+                className="text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 font-medium"
               >
                 {isSignUp ? "Sign in" : "Sign up"}
               </button>

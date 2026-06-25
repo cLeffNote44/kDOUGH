@@ -58,18 +58,18 @@ export default function RecipeDetailModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="recipe-detail-title"
-        className="glass-strong rounded-xl shadow-lg w-full max-w-md mx-4 max-h-[80vh] flex flex-col border border-stone-200/60 dark:border-stone-700/40"
+        className="glass-strong rounded-xl shadow-lg w-full max-w-md mx-4 max-h-[80vh] flex flex-col border border-slate-200/60 dark:border-slate-700/40"
       >
         {/* Header */}
-        <div className="p-4 border-b border-stone-200/60 dark:border-stone-700/40 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-200/60 dark:border-slate-700/40 flex items-center justify-between">
           <div>
-            <h2 id="recipe-detail-title" className="font-display font-semibold text-stone-900 dark:text-stone-100">{r.title}</h2>
-            <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{mealLabel}</p>
+            <h2 id="recipe-detail-title" className="font-display font-semibold text-slate-900 dark:text-slate-100">{r.title}</h2>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{mealLabel}</p>
           </div>
           <button
             onClick={onClose}
             aria-label="Close recipe details"
-            className="text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 text-lg"
+            className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 text-lg"
           >
             &times;
           </button>
@@ -90,18 +90,18 @@ export default function RecipeDetailModal({
           )}
 
           {r.description && (
-            <p className="text-sm text-stone-600 dark:text-stone-400">{r.description}</p>
+            <p className="text-sm text-slate-600 dark:text-slate-400">{r.description}</p>
           )}
 
           {/* Meta info + servings adjuster */}
-          <div className="flex flex-wrap items-center gap-3 text-xs text-stone-500 dark:text-stone-400">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
             {r.servings > 0 && (
               <ServingsAdjuster value={servings} onChange={setServings} />
             )}
             {r.prep_time && <span>{r.prep_time} min prep</span>}
             {r.cook_time && <span>{r.cook_time} min cook</span>}
             {totalTime && (
-              <span className="font-medium text-stone-700 dark:text-stone-300">{totalTime}</span>
+              <span className="font-medium text-slate-700 dark:text-slate-300">{totalTime}</span>
             )}
           </div>
 
@@ -111,7 +111,7 @@ export default function RecipeDetailModal({
               {r.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 text-xs rounded-full"
+                  className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs rounded-full"
                 >
                   {tag}
                 </span>
@@ -123,23 +123,23 @@ export default function RecipeDetailModal({
           {scaledIngredients.length > 0 && (
             <div>
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xs font-semibold text-stone-800 dark:text-stone-200 uppercase tracking-wide">
+                <h3 className="text-xs font-semibold text-slate-800 dark:text-slate-200 uppercase tracking-wide">
                   Ingredients
                 </h3>
                 {servings !== r.servings && r.servings > 0 && (
-                  <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                  <span className="text-[10px] text-teal-600 dark:text-teal-400 font-medium">
                     Scaled from {r.servings} to {servings}
                   </span>
                 )}
               </div>
               <ul className="space-y-1">
                 {scaledIngredients.map((ing, i) => (
-                  <li key={`${ing.name}-${ing.quantity}-${i}`} className="text-sm text-stone-700 dark:text-stone-300">
+                  <li key={`${ing.name}-${ing.quantity}-${i}`} className="text-sm text-slate-700 dark:text-slate-300">
                     {ing.quantity && (
                       <span className="font-medium">{ing.quantity}</span>
                     )}{" "}
                     {ing.unit && (
-                      <span className="text-stone-500 dark:text-stone-400">{ing.unit}</span>
+                      <span className="text-slate-500 dark:text-slate-400">{ing.unit}</span>
                     )}{" "}
                     {ing.name}
                   </li>
@@ -151,10 +151,10 @@ export default function RecipeDetailModal({
           {/* Instructions */}
           {r.instructions && (
             <div>
-              <h3 className="text-xs font-semibold text-stone-800 dark:text-stone-200 uppercase tracking-wide mb-2">
+              <h3 className="text-xs font-semibold text-slate-800 dark:text-slate-200 uppercase tracking-wide mb-2">
                 Instructions
               </h3>
-              <div className="text-sm text-stone-700 dark:text-stone-300 whitespace-pre-wrap leading-relaxed">
+              <div className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
                 {r.instructions}
               </div>
             </div>
@@ -162,12 +162,12 @@ export default function RecipeDetailModal({
 
           {/* Source */}
           {r.source_url && (
-            <div className="pt-3 border-t border-stone-200/60 dark:border-stone-700/40">
+            <div className="pt-3 border-t border-slate-200/60 dark:border-slate-700/40">
               <a
                 href={r.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 underline"
+                className="text-sm text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 underline"
               >
                 View original recipe &rarr;
               </a>
@@ -176,10 +176,10 @@ export default function RecipeDetailModal({
         </div>
 
         {/* Footer action */}
-        <div className="p-3 border-t border-stone-200/60 dark:border-stone-700/40">
+        <div className="p-3 border-t border-slate-200/60 dark:border-slate-700/40">
           <button
             onClick={onChangeRecipe}
-            className="w-full py-2 text-sm font-medium text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
+            className="w-full py-2 text-sm font-medium text-teal-700 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-lg transition-colors"
           >
             Change recipe
           </button>

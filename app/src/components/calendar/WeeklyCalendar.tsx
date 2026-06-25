@@ -206,25 +206,25 @@ export default function WeeklyCalendar({ mealPlans, weekStart, isCurrentWeek }: 
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={prevWeek}
-          className="px-3 py-1.5 text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors"
+          className="px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
         >
           &larr; Prev
         </button>
         {isCurrentWeek ? (
-          <span className="px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
+          <span className="px-3 py-1.5 text-xs font-semibold text-teal-700 dark:text-teal-400">
             This Week
           </span>
         ) : (
           <button
             onClick={() => router.push("/")}
-            className="px-3 py-1.5 text-xs font-medium text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
+            className="px-3 py-1.5 text-xs font-medium text-teal-700 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-lg transition-colors"
           >
             Go to This Week
           </button>
         )}
         <button
           onClick={nextWeek}
-          className="px-3 py-1.5 text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors"
+          className="px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
         >
           Next &rarr;
         </button>
@@ -246,11 +246,11 @@ export default function WeeklyCalendar({ mealPlans, weekStart, isCurrentWeek }: 
 
       {/* Empty week CTA */}
       {mealPlans.length === 0 && (
-        <div className="text-center py-6 mb-4 glass rounded-xl border border-stone-200/60 dark:border-stone-700/40">
-          <p className="text-stone-500 dark:text-stone-400 text-sm mb-1">
+        <div className="text-center py-6 mb-4 glass rounded-xl border border-slate-200/60 dark:border-slate-700/40">
+          <p className="text-slate-500 dark:text-slate-400 text-sm mb-1">
             No meals planned this week yet.
           </p>
-          <p className="text-xs text-stone-400 dark:text-stone-500">
+          <p className="text-xs text-slate-400 dark:text-slate-500">
             Tap an empty slot below to start adding recipes.
           </p>
         </div>
@@ -302,16 +302,16 @@ export default function WeeklyCalendar({ mealPlans, weekStart, isCurrentWeek }: 
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="remove-meal-title"
-            className="glass-strong rounded-xl shadow-lg w-full max-w-xs mx-4 p-5 border border-stone-200/60 dark:border-stone-700/40"
+            className="glass-strong rounded-xl shadow-lg w-full max-w-xs mx-4 p-5 border border-slate-200/60 dark:border-slate-700/40"
           >
-            <h3 id="remove-meal-title" className="font-display font-semibold text-stone-900 dark:text-stone-100 mb-1">Remove meal?</h3>
-            <p className="text-sm text-stone-500 dark:text-stone-400 mb-4">
-              Remove <span className="font-medium text-stone-700 dark:text-stone-300">{confirmRemove.title}</span> from {confirmRemove.mealLabel.toLowerCase()}?
+            <h3 id="remove-meal-title" className="font-display font-semibold text-slate-900 dark:text-slate-100 mb-1">Remove meal?</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+              Remove <span className="font-medium text-slate-700 dark:text-slate-300">{confirmRemove.title}</span> from {confirmRemove.mealLabel.toLowerCase()}?
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() => setConfirmRemove(null)}
-                className="flex-1 px-3 py-2 text-sm font-medium text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-lg transition-colors"
+                className="flex-1 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
               >
                 Cancel
               </button>

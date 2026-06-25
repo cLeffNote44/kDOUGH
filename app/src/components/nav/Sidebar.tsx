@@ -24,7 +24,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-[72px] z-50 glass-strong border-r border-stone-200/60 dark:border-stone-700/40"
+      className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-[72px] z-50 glass-strong border-r border-slate-200/60 dark:border-slate-700/40"
       style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
     >
       {/* Logo */}
@@ -55,8 +55,8 @@ export default function Sidebar() {
               title={link.label}
               className={`flex flex-col items-center justify-center gap-0.5 w-14 h-14 rounded-xl transition-colors ${
                 isActive
-                  ? "bg-gradient-to-b from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 text-amber-700 dark:text-amber-400"
-                  : "text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800/50"
+                  ? "bg-gradient-to-b from-teal-100 to-teal-100 dark:from-teal-900/40 dark:to-teal-900/40 text-teal-700 dark:text-teal-400"
+                  : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50"
               }`}
             >
               <NavIconSvg name={link.icon} />
@@ -77,7 +77,7 @@ export default function Sidebar() {
         <button
           onClick={toggle}
           title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          className="p-2.5 rounded-xl text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800/50 transition-colors"
+          className="p-2.5 rounded-xl text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
         >
           {theme === "dark" ? (
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -94,7 +94,7 @@ export default function Sidebar() {
         <button
           onClick={handleSignOut}
           title="Sign out"
-          className="p-2.5 rounded-xl text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800/50 transition-colors"
+          className="p-2.5 rounded-xl text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />

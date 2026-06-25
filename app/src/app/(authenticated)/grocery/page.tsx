@@ -68,8 +68,8 @@ export default async function GroceryPage({
     <div className="max-w-lg mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-display font-semibold text-stone-900 dark:text-stone-100">Grocery List</h1>
-          <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
+          <h1 className="text-xl font-display font-semibold text-slate-900 dark:text-slate-100">Grocery List</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             {monday.toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
@@ -100,10 +100,10 @@ export default async function GroceryPage({
           recipeMap={recipeMap}
         />
       ) : (
-        <div className="text-center py-16 glass rounded-xl border border-stone-200/60 dark:border-stone-700/40">
+        <div className="text-center py-16 glass rounded-xl border border-slate-200/60 dark:border-slate-700/40">
           <EmptyGroceryIllustration />
-          <p className="text-stone-500 dark:text-stone-400 mb-2">No grocery list yet</p>
-          <p className="text-sm text-stone-400 dark:text-stone-500">
+          <p className="text-slate-500 dark:text-slate-400 mb-2">No grocery list yet</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500">
             Plan your meals for the week, then hit &ldquo;Generate from
             Plan&rdquo; to create your shopping list.
           </p>

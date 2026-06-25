@@ -48,21 +48,21 @@ export default function DayCard({
     <div
       className={`rounded-xl border p-3 transition-colors ${
         isToday
-          ? "border-amber-300/60 dark:border-amber-600/40 bg-amber-50/80 dark:bg-amber-950/30 glass"
-          : "border-stone-200/60 dark:border-stone-700/40 glass"
+          ? "border-teal-300/60 dark:border-teal-600/40 bg-teal-50/80 dark:bg-teal-950/30 glass"
+          : "border-slate-200/60 dark:border-slate-700/40 glass"
       } card-hover-lift`}
     >
       <div className="flex items-center justify-between mb-2">
         <span
           className={`text-xs font-semibold uppercase tracking-wide ${
-            isToday ? "text-amber-700 dark:text-amber-400" : "text-stone-400 dark:text-stone-500"
+            isToday ? "text-teal-700 dark:text-teal-400" : "text-slate-400 dark:text-slate-500"
           }`}
         >
           {dayLabel}
         </span>
         <span
           className={`text-xs ${
-            isToday ? "text-amber-600 dark:text-amber-400 font-medium" : "text-stone-400 dark:text-stone-500"
+            isToday ? "text-teal-600 dark:text-teal-400 font-medium" : "text-slate-400 dark:text-slate-500"
           }`}
         >
           {(() => {

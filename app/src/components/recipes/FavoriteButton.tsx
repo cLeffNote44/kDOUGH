@@ -45,7 +45,7 @@ export default function FavoriteButton({
       className={`${buttonSize} rounded-lg transition-colors ${
         isFavorite
           ? "text-rose-500 hover:text-rose-600"
-          : "text-stone-300 dark:text-stone-600 hover:text-rose-400 dark:hover:text-rose-400"
+          : "text-slate-300 dark:text-slate-600 hover:text-rose-400 dark:hover:text-rose-400"
       } disabled:opacity-50`}
     >
       <svg

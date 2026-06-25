@@ -4,7 +4,7 @@
 export function EmptyGroceryIllustration() {
   return (
     <svg
-      className="w-20 h-20 mx-auto mb-4 text-stone-300 dark:text-stone-600"
+      className="w-20 h-20 mx-auto mb-4 text-slate-300 dark:text-slate-600"
       viewBox="0 0 80 80"
       fill="none"
       stroke="currentColor"
@@ -29,7 +29,7 @@ export function EmptyGroceryIllustration() {
 export function EmptyRecipesIllustration() {
   return (
     <svg
-      className="w-20 h-20 mx-auto mb-4 text-stone-300 dark:text-stone-600"
+      className="w-20 h-20 mx-auto mb-4 text-slate-300 dark:text-slate-600"
       viewBox="0 0 80 80"
       fill="none"
       stroke="currentColor"
@@ -57,7 +57,7 @@ export function EmptyRecipesIllustration() {
 export function EmptySearchIllustration() {
   return (
     <svg
-      className="w-16 h-16 mx-auto mb-3 text-stone-300 dark:text-stone-600"
+      className="w-16 h-16 mx-auto mb-3 text-slate-300 dark:text-slate-600"
       viewBox="0 0 64 64"
       fill="none"
       stroke="currentColor"

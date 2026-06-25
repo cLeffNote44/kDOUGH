@@ -46,11 +46,11 @@ export default async function RecipesPage({
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-display font-semibold text-stone-900 dark:text-stone-100">Recipes</h1>
+        <h1 className="text-xl font-display font-semibold text-slate-900 dark:text-slate-100">Recipes</h1>
         <div className="flex gap-2">
           <Link
             href="/import"
-            className="px-4 py-2 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 text-sm font-medium rounded-lg transition-colors border border-amber-300 dark:border-amber-700"
+            className="px-4 py-2 text-teal-700 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 text-sm font-medium rounded-lg transition-colors border border-teal-300 dark:border-teal-700"
           >
             Import URL
           </Link>
@@ -67,14 +67,14 @@ export default async function RecipesPage({
       <RecipeSearch currentQuery={q ?? ""} currentTag={tag ?? ""} allTags={allTags} />
 
       {!recipes || recipes.length === 0 ? (
-        <div className="text-center py-16 glass rounded-xl border border-stone-200/60 dark:border-stone-700/40">
+        <div className="text-center py-16 glass rounded-xl border border-slate-200/60 dark:border-slate-700/40">
           <EmptyRecipesIllustration />
-          <p className="text-stone-500 dark:text-stone-400 mb-2">
+          <p className="text-slate-500 dark:text-slate-400 mb-2">
             {q || tag ? "No recipes match your search" : "No recipes yet"}
           </p>
-          <p className="text-sm text-stone-400 dark:text-stone-500">
+          <p className="text-sm text-slate-400 dark:text-slate-500">
             {q || tag ? (
-              <Link href="/recipes" className="text-amber-600 dark:text-amber-400 underline">
+              <Link href="/recipes" className="text-teal-600 dark:text-teal-400 underline">
                 Clear filters
               </Link>
             ) : (
@@ -85,7 +85,7 @@ export default async function RecipesPage({
       ) : (
         <>
           {(q || tag) && (
-            <p className="text-sm text-stone-400 dark:text-stone-500 mb-3">
+            <p className="text-sm text-slate-400 dark:text-slate-500 mb-3">
               {recipes.length} recipe{recipes.length !== 1 ? "s" : ""} found
             </p>
           )}

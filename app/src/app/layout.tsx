@@ -55,7 +55,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={isDark ? "dark" : ""}>
-      <body className={`${geist.variable} ${outfit.variable} font-sans antialiased bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 transition-colors duration-300`}>
+      <body className={`${geist.variable} ${outfit.variable} font-sans antialiased bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300`}>
         <ThemeProvider initialTheme={isDark ? "dark" : "light"}>
           {children}
         </ThemeProvider>

@@ -9,7 +9,7 @@ export default function Toaster() {
       offset={80}
       toastOptions={{
         className:
-          "glass-strong !border !border-stone-200/60 dark:!border-stone-700/40 !text-stone-900 dark:!text-stone-100 !text-sm",
+          "glass-strong !border !border-slate-200/60 dark:!border-slate-700/40 !text-slate-900 dark:!text-slate-100 !text-sm",
         style: {
           // Sonner injects inline styles; these ensure our glassmorphism shows through
           background: "transparent",

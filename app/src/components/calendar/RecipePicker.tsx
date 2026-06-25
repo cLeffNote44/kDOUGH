@@ -89,17 +89,17 @@ export default function RecipePicker({ date, dayLabel, mealType, onClose }: Reci
         role="dialog"
         aria-modal="true"
         aria-labelledby="recipe-picker-title"
-        className="glass-strong rounded-xl shadow-lg w-full max-w-md mx-4 max-h-[70vh] flex flex-col border border-stone-200/60 dark:border-stone-700/40"
+        className="glass-strong rounded-xl shadow-lg w-full max-w-md mx-4 max-h-[70vh] flex flex-col border border-slate-200/60 dark:border-slate-700/40"
       >
-        <div className="p-4 border-b border-stone-200/60 dark:border-stone-700/40">
+        <div className="p-4 border-b border-slate-200/60 dark:border-slate-700/40">
           <div className="flex items-center justify-between mb-3">
-            <h2 id="recipe-picker-title" className="font-display font-semibold text-stone-900 dark:text-stone-100">
+            <h2 id="recipe-picker-title" className="font-display font-semibold text-slate-900 dark:text-slate-100">
               {dayLabel} {mealType.charAt(0).toUpperCase() + mealType.slice(1)} &middot; {formattedDate}
             </h2>
             <button
               onClick={onClose}
               aria-label="Close recipe picker"
-              className="text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 text-lg"
+              className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 text-lg"
             >
               &times;
             </button>
@@ -110,17 +110,17 @@ export default function RecipePicker({ date, dayLabel, mealType, onClose }: Reci
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search recipes..."
             autoFocus
-            className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg text-sm bg-white/80 dark:bg-stone-800/80 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
           />
         </div>
 
         <div className="overflow-y-auto flex-1 p-2">
           {loading ? (
-            <p className="text-center text-stone-400 dark:text-stone-500 py-8 text-sm">Loading recipes...</p>
+            <p className="text-center text-slate-400 dark:text-slate-500 py-8 text-sm">Loading recipes...</p>
           ) : filtered.length === 0 ? (
             <div className="text-center py-8">
               <EmptySearchIllustration />
-              <p className="text-stone-400 dark:text-stone-500 text-sm">
+              <p className="text-slate-400 dark:text-slate-500 text-sm">
                 {recipes.length === 0
                   ? "No recipes yet. Add some first!"
                   : "No recipes match your search."}
@@ -132,7 +132,7 @@ export default function RecipePicker({ date, dayLabel, mealType, onClose }: Reci
                 key={recipe.id}
                 onClick={() => handleAssign(recipe.id)}
                 disabled={assigning !== null}
-                className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors disabled:opacity-50 flex items-center justify-between"
+                className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-colors disabled:opacity-50 flex items-center justify-between"
               >
                 <div className="flex items-center gap-2">
                   {recipe.is_favorite && (
@@ -141,16 +141,16 @@ export default function RecipePicker({ date, dayLabel, mealType, onClose }: Reci
                     </svg>
                   )}
                   <div>
-                    <p className="text-sm font-medium text-stone-900 dark:text-stone-100">{recipe.title}</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{recipe.title}</p>
                     {recipe.description && (
-                      <p className="text-xs text-stone-500 dark:text-stone-400 truncate max-w-[280px]">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[280px]">
                         {recipe.description}
                       </p>
                     )}
                   </div>
                 </div>
                 {assigning === recipe.id && (
-                  <span className="text-xs text-amber-600 dark:text-amber-400">Adding...</span>
+                  <span className="text-xs text-teal-600 dark:text-teal-400">Adding...</span>
                 )}
               </button>
             ))

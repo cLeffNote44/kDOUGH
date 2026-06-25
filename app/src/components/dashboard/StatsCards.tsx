@@ -14,8 +14,8 @@ export default function StatsCards({ recipeCount, mealsPlanned, groceryRemaining
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
         </svg>
       ),
-      accent: "text-amber-600 dark:text-amber-400",
-      bg: "bg-amber-50 dark:bg-amber-900/20",
+      accent: "text-teal-600 dark:text-teal-400",
+      bg: "bg-teal-50 dark:bg-teal-900/20",
     },
     {
       label: "Meals planned",
@@ -46,15 +46,15 @@ export default function StatsCards({ recipeCount, mealsPlanned, groceryRemaining
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className="glass rounded-xl border border-stone-200/60 dark:border-stone-700/40 p-3 sm:p-4 card-hover-lift"
+          className="glass rounded-xl border border-slate-200/60 dark:border-slate-700/40 p-3 sm:p-4 card-hover-lift"
         >
           <div className={`${stat.bg} ${stat.accent} w-8 h-8 rounded-lg flex items-center justify-center mb-2`}>
             {stat.icon}
           </div>
-          <p className="text-xl sm:text-2xl font-display font-semibold text-stone-900 dark:text-stone-100">
+          <p className="text-xl sm:text-2xl font-display font-semibold text-slate-900 dark:text-slate-100">
             {stat.value}
           </p>
-          <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             {stat.label}
           </p>
         </div>

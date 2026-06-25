@@ -40,29 +40,29 @@ body {
 }
 
 :is(.dark, .dark *) .glass {
-  background: rgba(28, 25, 23, 0.7);
+  background: rgba(15, 23, 42, 0.7);
 }
 
 :is(.dark, .dark *) .glass-strong {
-  background: rgba(28, 25, 23, 0.88);
+  background: rgba(15, 23, 42, 0.88);
 }
 
 /* ── Gradient button ──────────────────────────── */
 
 .btn-gradient {
-  background: linear-gradient(135deg, #f59e0b, #ea580c);
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
   color: white;
   font-weight: 500;
   transition: all 0.2s;
 }
 
 .btn-gradient:hover {
-  background: linear-gradient(135deg, #d97706, #c2410c);
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+  background: linear-gradient(135deg, #0d9488, #0f766e);
+  box-shadow: 0 4px 14px rgba(20, 184, 166, 0.35);
 }
 
 .btn-gradient:disabled {
-  background: linear-gradient(135deg, #fbbf24, #fb923c);
+  background: linear-gradient(135deg, #5eead4, #2dd4bf);
   opacity: 0.6;
   box-shadow: none;
 }
