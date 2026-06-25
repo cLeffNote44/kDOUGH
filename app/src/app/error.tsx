@@ -22,7 +22,7 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-200 dark:bg-slate-800 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-300 dark:bg-slate-700 px-4">
       <div className="text-center max-w-md">
         {/* Error illustration */}
         <div className="flex justify-center mb-5">

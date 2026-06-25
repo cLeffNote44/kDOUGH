@@ -42,7 +42,7 @@ export default function ResetPasswordPage() {
     "w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white/80 dark:bg-slate-800/80 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-200 dark:bg-slate-800">
+    <div className="min-h-screen flex items-center justify-center bg-slate-300 dark:bg-slate-700">
       <div className="w-full max-w-sm mx-auto p-8">
         <div className="text-center mb-8">
           <img
