@@ -3,7 +3,7 @@
 import { useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { removeRecipeFromDay, moveRecipeToSlot, planMyWeek } from "@/lib/actions";
+import { removeRecipeFromDay, moveRecipeToSlot, planMyWeek, markCooked, undoLastCook } from "@/lib/actions";
 import { toDateString } from "@/lib/dates";
 import type { MealPlan } from "@/types";
 import { DAYS, MEAL_TYPES } from "./meal-types";
@@ -173,6 +173,24 @@ export default function WeeklyCalendar({ mealPlans, weekStart, isCurrentWeek }: 
     setDropTarget(null);
   };
 
+  // Log a cook straight from the calendar slot, with an inline Undo.
+  const handleMarkCooked = async (plan: MealPlan) => {
+    const result = await markCooked(plan.recipes.id);
+    if (result?.error) {
+      toast.error(result.error);
+      return;
+    }
+    toast.success("Marked as cooked", {
+      action: {
+        label: "Undo",
+        onClick: async () => {
+          const undo = await undoLastCook(plan.recipes.id);
+          if (undo?.error) toast.error(undo.error);
+        },
+      },
+    });
+  };
+
   // C9: Render expanded content for a slot
   const renderExpanded = (plan: MealPlan, mealLabel: string, date: string, dayLabel: string, mealType: string) => {
     const mt = MEAL_TYPES.find((m) => m.key === mealType)!;
@@ -195,6 +213,10 @@ export default function WeeklyCalendar({ mealPlans, weekStart, isCurrentWeek }: 
         onMove={() => {
           setExpandedSlot(null);
           setMoveTarget({ plan, date, mealType });
+        }}
+        onMarkCooked={() => {
+          setExpandedSlot(null);
+          handleMarkCooked(plan);
         }}
       />
     );

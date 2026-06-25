@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import FavoriteButton from "./FavoriteButton";
+import RatingStars from "./RatingStars";
 
 // Map first tag to a color stripe — adds visual variety to the grid
 const TAG_COLORS: Record<string, string> = {
@@ -26,6 +27,8 @@ interface RecipeCardProps {
   cook_time: number | null;
   image_url: string | null;
   is_favorite?: boolean;
+  rating?: number | null;
+  cookedCount?: number;
 }
 
 export default function RecipeCard({
@@ -37,6 +40,8 @@ export default function RecipeCard({
   cook_time,
   image_url,
   is_favorite = false,
+  rating = null,
+  cookedCount = 0,
 }: RecipeCardProps) {
   const [imgError, setImgError] = useState(false);
   const firstTag = tags?.[0]?.toLowerCase() ?? "";
@@ -87,6 +92,18 @@ export default function RecipeCard({
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
             {description}
           </p>
+        )}
+        {(rating || cookedCount > 0) && (
+          <div className="flex items-center gap-2 mt-2">
+            {rating ? (
+              <RatingStars recipeId={id} initialRating={rating} readonly size="sm" />
+            ) : null}
+            {cookedCount > 0 && (
+              <span className="text-[11px] font-medium text-teal-700 dark:text-teal-400">
+                Cooked {cookedCount}&times;
+              </span>
+            )}
+          </div>
         )}
         <div className="flex items-center justify-between mt-2">
           {(prep_time || cook_time) ? (

@@ -18,7 +18,7 @@ export default async function RecipesPage({
 
   let query = supabase
     .from("recipes")
-    .select("id, title, description, tags, cook_time, prep_time, image_url, is_favorite")
+    .select("id, title, description, tags, cook_time, prep_time, image_url, is_favorite, rating")
     .order("is_favorite", { ascending: false })
     .order("created_at", { ascending: false });
 
@@ -33,6 +33,15 @@ export default async function RecipesPage({
   }
 
   const { data: recipes } = await query;
+
+  // Per-recipe cook counts for the "Cooked N×" badge (RLS scopes to the user).
+  const { data: cookRows } = await supabase
+    .from("cook_events")
+    .select("recipe_id");
+  const cookCounts = new Map<string, number>();
+  for (const row of cookRows ?? []) {
+    cookCounts.set(row.recipe_id, (cookCounts.get(row.recipe_id) ?? 0) + 1);
+  }
 
   // Get all unique tags for the filter
   const { data: allRecipes } = await supabase
@@ -112,6 +121,8 @@ export default async function RecipesPage({
                 cook_time={recipe.cook_time}
                 image_url={recipe.image_url}
                 is_favorite={recipe.is_favorite ?? false}
+                rating={recipe.rating}
+                cookedCount={cookCounts.get(recipe.id) ?? 0}
               />
             ))}
           </div>
