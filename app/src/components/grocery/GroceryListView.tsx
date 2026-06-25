@@ -258,7 +258,11 @@ export default function GroceryListView({
         // User cancelled or share failed — no-op.
       }
     } else {
-      await handleCopy();
+      // No native share sheet (e.g. desktop) — open an email draft so Share is
+      // distinct from Copy.
+      window.location.assign(
+        `mailto:?subject=${encodeURIComponent("Grocery List")}&body=${encodeURIComponent(text)}`
+      );
     }
   };
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import DeleteRecipeButton from "@/components/recipes/DeleteRecipeButton";
 import FavoriteButton from "@/components/recipes/FavoriteButton";
 import ScalableIngredients from "@/components/recipes/ScalableIngredients";
+import RecipeExportButtons from "@/components/recipes/RecipeExportButtons";
 import type { Recipe, Ingredient } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -58,6 +59,32 @@ export default async function RecipeDetailPage({
         </Link>
         <FavoriteButton recipeId={r.id} initialFavorite={r.is_favorite} />
         <DeleteRecipeButton id={r.id} title={r.title} />
+      </div>
+
+      {r.image_url && (
+        <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden mb-5 bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/40">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={r.image_url}
+            alt={r.title}
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
+
+      {/* Share / print / copy */}
+      <div className="flex justify-end mb-5">
+        <RecipeExportButtons
+          title={r.title}
+          description={r.description}
+          servings={r.servings}
+          prep_time={r.prep_time}
+          cook_time={r.cook_time}
+          ingredients={r.ingredients as Ingredient[]}
+          instructions={r.instructions}
+          source_url={r.source_url}
+        />
       </div>
 
       {r.description && (

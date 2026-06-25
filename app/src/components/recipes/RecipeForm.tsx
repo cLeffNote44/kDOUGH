@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import type { Ingredient, Recipe } from "@/types";
+import RecipeImageField from "./RecipeImageField";
 
 /** Ingredient with a stable key for React list rendering. */
 interface KeyedIngredient extends Ingredient {
@@ -10,6 +11,7 @@ interface KeyedIngredient extends Ingredient {
 
 interface RecipeFormProps {
   recipe?: Recipe;
+  userId: string;
   action: (formData: FormData) => Promise<{ error?: string } | undefined>;
   submitLabel: string;
 }
@@ -18,7 +20,7 @@ function withKey(ing: Ingredient): KeyedIngredient {
   return { ...ing, _key: crypto.randomUUID() };
 }
 
-export default function RecipeForm({ recipe, action, submitLabel }: RecipeFormProps) {
+export default function RecipeForm({ recipe, userId, action, submitLabel }: RecipeFormProps) {
   const [ingredients, setIngredients] = useState<KeyedIngredient[]>(
     (recipe?.ingredients ?? [{ name: "", quantity: "", unit: "" }]).map(withKey)
   );
@@ -97,6 +99,9 @@ export default function RecipeForm({ recipe, action, submitLabel }: RecipeFormPr
           className={inputClasses}
         />
       </div>
+
+      {/* Photo */}
+      <RecipeImageField userId={userId} defaultUrl={recipe?.image_url} />
 
       {/* Time & Servings Row */}
       <div className="grid grid-cols-3 gap-4">
