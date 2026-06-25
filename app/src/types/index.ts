@@ -17,8 +17,18 @@ export interface Recipe {
   cook_time: number | null;
   tags: string[];
   is_favorite: boolean;
+  rating: number | null; // 1-5 stars, null = unrated
+  notes: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface CookEvent {
+  id: string;
+  recipe_id: string;
+  cooked_at: string; // ISO timestamptz
+  source: "manual" | "calendar";
+  created_at: string;
 }
 
 export interface MealPlan {

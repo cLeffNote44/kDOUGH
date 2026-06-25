@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useTransition } from "react";
+import { toast } from "sonner";
 import type { Recipe, Ingredient } from "@/types";
 import { scaleIngredients } from "@/lib/scale-recipe";
+import { markCooked, undoLastCook } from "@/lib/actions";
 import ServingsAdjuster from "@/components/ServingsAdjuster";
 import { useFocusTrap } from "@/components/useFocusTrap";
 
@@ -45,6 +47,27 @@ export default function RecipeDetailModal({
 
   // Focus trap + Escape-to-close + focus restore.
   useFocusTrap(modalRef, onClose);
+
+  const [isCooking, startCook] = useTransition();
+  const handleMarkCooked = () => {
+    startCook(async () => {
+      const result = await markCooked(r.id);
+      if (result?.error) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Marked as cooked", {
+        action: {
+          label: "Undo",
+          onClick: () =>
+            startCook(async () => {
+              const undo = await undoLastCook(r.id);
+              if (undo?.error) toast.error(undo.error);
+            }),
+        },
+      });
+    });
+  };
 
   const totalTime =
     (r.prep_time ?? 0) + (r.cook_time ?? 0) > 0
@@ -175,11 +198,18 @@ export default function RecipeDetailModal({
           )}
         </div>
 
-        {/* Footer action */}
-        <div className="p-3 border-t border-slate-200/60 dark:border-slate-700/40">
+        {/* Footer actions */}
+        <div className="p-3 border-t border-slate-200/60 dark:border-slate-700/40 flex gap-2">
+          <button
+            onClick={handleMarkCooked}
+            disabled={isCooking}
+            className="flex-1 py-2 text-sm font-medium rounded-lg border border-teal-300 dark:border-teal-700 text-teal-700 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-colors disabled:opacity-50"
+          >
+            {isCooking ? "Saving…" : "Mark cooked"}
+          </button>
           <button
             onClick={onChangeRecipe}
-            className="w-full py-2 text-sm font-medium text-teal-700 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-lg transition-colors"
+            className="flex-1 py-2 text-sm font-medium text-teal-700 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-lg transition-colors"
           >
             Change recipe
           </button>

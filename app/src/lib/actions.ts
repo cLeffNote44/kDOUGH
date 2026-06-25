@@ -17,6 +17,8 @@ import {
   importedRecipeSchema,
   uuidSchema,
   mealTypeSchema,
+  ratingSchema,
+  notesSchema,
 } from "@/lib/validations";
 
 // ============================================
@@ -893,4 +895,139 @@ export async function planMyWeek(weekStart: string) {
     return { error: "Couldn't assign any meals. Please try again." };
   }
   return { success: true, assigned };
+}
+
+// ============================================
+// COOK TRACKING ACTIONS
+// ============================================
+
+/**
+ * Log that a recipe was cooked. Optional explicit timestamp ("cooked it
+ * yesterday"); otherwise the DB default now() is used.
+ */
+export async function markCooked(recipeId: string, cookedAt?: string) {
+  const idResult = uuidSchema.safeParse(recipeId);
+  if (!idResult.success) return { error: "Invalid recipe ID" };
+
+  let cooked_at: string | undefined;
+  if (cookedAt != null) {
+    const t = new Date(cookedAt);
+    if (isNaN(t.getTime())) return { error: "Invalid date" };
+    cooked_at = t.toISOString();
+  }
+
+  const auth = await requireAuth();
+  if (auth.error) return { error: auth.error };
+  const { supabase, user } = auth;
+
+  // Ownership guard: only log a cook for a recipe the user owns.
+  const { data: recipe } = await supabase
+    .from("recipes")
+    .select("id")
+    .eq("id", idResult.data)
+    .eq("user_id", user.id)
+    .single();
+  if (!recipe) return { error: "Recipe not found" };
+
+  const { error } = await supabase.from("cook_events").insert({
+    user_id: user.id,
+    recipe_id: idResult.data,
+    ...(cooked_at ? { cooked_at } : {}),
+  });
+  if (error) {
+    console.error("markCooked DB error:", error);
+    return { error: "Failed to mark cooked. Please try again." };
+  }
+
+  revalidatePath("/recipes");
+  revalidatePath(`/recipes/${idResult.data}`);
+  revalidatePath("/");
+  return { success: true };
+}
+
+/** Undo the user's most recent cook for a recipe. */
+export async function undoLastCook(recipeId: string) {
+  const idResult = uuidSchema.safeParse(recipeId);
+  if (!idResult.success) return { error: "Invalid recipe ID" };
+
+  const auth = await requireAuth();
+  if (auth.error) return { error: auth.error };
+  const { supabase, user } = auth;
+
+  const { data: last } = await supabase
+    .from("cook_events")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("recipe_id", idResult.data)
+    .order("cooked_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!last) return { error: "No cook to undo" };
+
+  const { error } = await supabase
+    .from("cook_events")
+    .delete()
+    .eq("id", last.id)
+    .eq("user_id", user.id);
+  if (error) {
+    console.error("undoLastCook DB error:", error);
+    return { error: "Failed to undo. Please try again." };
+  }
+
+  revalidatePath("/recipes");
+  revalidatePath(`/recipes/${idResult.data}`);
+  revalidatePath("/");
+  return { success: true };
+}
+
+/** Set the 1-5 star rating on a recipe. */
+export async function setRecipeRating(recipeId: string, rating: number) {
+  const idResult = uuidSchema.safeParse(recipeId);
+  if (!idResult.success) return { error: "Invalid recipe ID" };
+  const ratingResult = ratingSchema.safeParse(rating);
+  if (!ratingResult.success) return { error: "Rating must be 1-5" };
+
+  const auth = await requireAuth();
+  if (auth.error) return { error: auth.error };
+  const { supabase, user } = auth;
+
+  const { error } = await supabase
+    .from("recipes")
+    .update({ rating: ratingResult.data })
+    .eq("id", idResult.data)
+    .eq("user_id", user.id);
+  if (error) {
+    console.error("setRecipeRating DB error:", error);
+    return { error: "Failed to save rating. Please try again." };
+  }
+
+  revalidatePath("/recipes");
+  revalidatePath(`/recipes/${idResult.data}`);
+  return { success: true, rating: ratingResult.data };
+}
+
+/** Save free-form notes on a recipe; an empty string clears them (-> null). */
+export async function setRecipeNotes(recipeId: string, notes: string) {
+  const idResult = uuidSchema.safeParse(recipeId);
+  if (!idResult.success) return { error: "Invalid recipe ID" };
+  const notesResult = notesSchema.safeParse(notes ?? "");
+  if (!notesResult.success) return { error: "Notes are too long" };
+
+  const auth = await requireAuth();
+  if (auth.error) return { error: auth.error };
+  const { supabase, user } = auth;
+
+  const trimmed = notesResult.data.trim();
+  const { error } = await supabase
+    .from("recipes")
+    .update({ notes: trimmed || null })
+    .eq("id", idResult.data)
+    .eq("user_id", user.id);
+  if (error) {
+    console.error("setRecipeNotes DB error:", error);
+    return { error: "Failed to save notes. Please try again." };
+  }
+
+  revalidatePath(`/recipes/${idResult.data}`);
+  return { success: true };
 }

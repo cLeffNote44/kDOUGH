@@ -3,9 +3,13 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import DeleteRecipeButton from "@/components/recipes/DeleteRecipeButton";
 import FavoriteButton from "@/components/recipes/FavoriteButton";
+import MarkCookedButton from "@/components/recipes/MarkCookedButton";
+import RatingStars from "@/components/recipes/RatingStars";
+import RecipeNotesEditor from "@/components/recipes/RecipeNotesEditor";
 import ScalableIngredients from "@/components/recipes/ScalableIngredients";
 import RecipeExportButtons from "@/components/recipes/RecipeExportButtons";
-import type { Recipe, Ingredient } from "@/types";
+import { timesCooked, lastCookedAt } from "@/lib/cooking";
+import type { Recipe, Ingredient, CookEvent } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +45,17 @@ export default async function RecipeDetailPage({
       ? `${(r.prep_time ?? 0) + (r.cook_time ?? 0)} min total`
       : null;
 
+  // Cook history for this recipe (most recent first) → "Cooked N× · last on …".
+  const { data: cookEvents } = await supabase
+    .from("cook_events")
+    .select("id, cooked_at, source, recipe_id, created_at")
+    .eq("user_id", user.id)
+    .eq("recipe_id", id)
+    .order("cooked_at", { ascending: false });
+  const events = (cookEvents ?? []) as unknown as CookEvent[];
+  const cookedCount = timesCooked(events);
+  const lastCooked = lastCookedAt(events);
+
   return (
     <div className="max-w-2xl">
       <div className="flex items-center gap-3 mb-6">
@@ -57,6 +72,7 @@ export default async function RecipeDetailPage({
         >
           Edit
         </Link>
+        <MarkCookedButton recipeId={r.id} />
         <FavoriteButton recipeId={r.id} initialFavorite={r.is_favorite} />
         <DeleteRecipeButton id={r.id} title={r.title} />
       </div>
@@ -92,11 +108,22 @@ export default async function RecipeDetailPage({
       )}
 
       {/* Meta info */}
-      <div className="flex gap-4 text-sm text-slate-500 dark:text-slate-400 mb-6">
+      <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400 mb-3">
         {r.servings && <span>{r.servings} servings</span>}
         {r.prep_time && <span>{r.prep_time} min prep</span>}
         {r.cook_time && <span>{r.cook_time} min cook</span>}
         {totalTime && <span className="font-medium text-slate-700 dark:text-slate-300">{totalTime}</span>}
+        {cookedCount > 0 && (
+          <span className="font-medium text-teal-700 dark:text-teal-400">
+            Cooked {cookedCount}&times;
+            {lastCooked ? ` · last on ${lastCooked.toLocaleDateString()}` : ""}
+          </span>
+        )}
+      </div>
+
+      {/* Rating */}
+      <div className="mb-6">
+        <RatingStars recipeId={r.id} initialRating={r.rating} />
       </div>
 
       {/* Tags */}
@@ -132,6 +159,9 @@ export default async function RecipeDetailPage({
           </div>
         </div>
       )}
+
+      {/* Personal notes */}
+      <RecipeNotesEditor recipeId={r.id} initialNotes={r.notes} />
 
       {/* Source */}
       {r.source_url && (

@@ -8,6 +8,7 @@ interface MealSlotExpandedProps {
   onRemove: () => void;
   onViewFull: () => void;
   onMove: () => void;
+  onMarkCooked: () => void;
 }
 
 export default function MealSlotExpanded({
@@ -17,6 +18,7 @@ export default function MealSlotExpanded({
   onRemove,
   onViewFull,
   onMove,
+  onMarkCooked,
 }: MealSlotExpandedProps) {
   const recipe = plan.recipes;
   const prep = recipe.prep_time;
@@ -96,6 +98,12 @@ export default function MealSlotExpanded({
           className={`flex-1 text-[10px] font-medium py-1 rounded-md ${mt.accent} hover:underline`}
         >
           Full Recipe
+        </button>
+        <button
+          onClick={onMarkCooked}
+          className={`flex-1 text-[10px] font-medium py-1 rounded-md ${mt.accent} hover:underline`}
+        >
+          Cooked
         </button>
       </div>
     </div>

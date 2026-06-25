@@ -59,5 +59,9 @@ export const mealTypeSchema = z.enum([
   "dessert",
 ]);
 
+// Cook tracking: 1-5 star rating and a free-form personal note per recipe.
+export const ratingSchema = z.coerce.number().int().min(1).max(5);
+export const notesSchema = z.string().max(5000);
+
 export type RecipeFormInput = z.infer<typeof recipeFormSchema>;
 export type ImportedRecipeInput = z.infer<typeof importedRecipeSchema>;
