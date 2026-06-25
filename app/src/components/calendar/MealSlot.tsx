@@ -157,7 +157,7 @@ export default function MealSlot({
         e.preventDefault();
         onDrop?.(e);
       }}
-      className={`w-full flex items-center justify-center h-8 border border-dashed border-slate-300 dark:border-slate-500 ${mt.hoverBorder} ${mt.hoverBg} rounded-md transition-colors cursor-pointer ${
+      className={`w-full flex items-center justify-center h-8 border border-dashed border-slate-300 dark:border-slate-400 ${mt.hoverBorder} ${mt.hoverBg} rounded-md transition-colors cursor-pointer ${
         isDropTarget ? "meal-slot-drag-over" : ""
       }`}
     >

@@ -250,7 +250,7 @@ export default function WeeklyCalendar({ mealPlans, weekStart, isCurrentWeek }: 
           <p className="text-slate-500 dark:text-slate-400 text-sm mb-1">
             No meals planned this week yet.
           </p>
-          <p className="text-xs text-slate-400 dark:text-slate-500">
+          <p className="text-xs text-slate-400 dark:text-slate-300">
             Tap an empty slot below to start adding recipes.
           </p>
         </div>

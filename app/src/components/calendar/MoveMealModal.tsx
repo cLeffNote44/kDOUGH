@@ -81,7 +81,7 @@ export default function MoveMealModal({
           <button
             onClick={onClose}
             aria-label="Cancel move"
-            className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 text-lg"
+            className="text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white text-lg"
           >
             &times;
           </button>
@@ -126,7 +126,7 @@ export default function MoveMealModal({
         </div>
 
         <div className="p-2.5 border-t border-slate-200/60 dark:border-slate-700/40 text-center">
-          <span className="text-[11px] text-slate-400 dark:text-slate-500">
+          <span className="text-[11px] text-slate-400 dark:text-slate-300">
             Outlined slots already have a meal and will be replaced.
           </span>
         </div>
