@@ -45,7 +45,7 @@ export default function ShortcutHelpModal({ onClose }: { onClose: () => void }) 
           <button
             onClick={onClose}
             aria-label="Close shortcuts"
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-xl leading-none"
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xl leading-none"
           >
             &times;
           </button>

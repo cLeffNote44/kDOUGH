@@ -138,7 +138,7 @@ export default function PantryView({ items }: { items: PantryItem[] }) {
           ))}
         </ul>
       ) : (
-        <p className="text-center text-sm text-slate-400 dark:text-slate-500 py-8">
+        <p className="text-center text-sm text-slate-400 dark:text-slate-300 py-8">
           No staples yet. Add the things you always keep on hand so they don&apos;t
           clutter your grocery list.
         </p>

@@ -136,7 +136,7 @@ export default function ImportPage() {
       <div className="flex items-center gap-3 mb-6">
         <Link
           href="/recipes"
-          className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+          className="text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white transition-colors"
         >
           &larr;
         </Link>
@@ -153,7 +153,7 @@ export default function ImportPage() {
           className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
             tab === "url"
               ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm"
-              : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+              : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white"
           }`}
         >
           From URL
@@ -166,7 +166,7 @@ export default function ImportPage() {
           className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
             tab === "photo"
               ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm"
-              : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+              : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white"
           }`}
         >
           From Photo
@@ -210,7 +210,7 @@ export default function ImportPage() {
             className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl cursor-pointer hover:border-teal-400 dark:hover:border-teal-600 hover:bg-teal-50/50 dark:hover:bg-teal-900/10 transition-colors"
           >
             <svg
-              className="w-10 h-10 text-slate-400 dark:text-slate-500 mb-3"
+              className="w-10 h-10 text-slate-400 dark:text-slate-300 mb-3"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -230,7 +230,7 @@ export default function ImportPage() {
             <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
               Click to upload a photo
             </span>
-            <span className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+            <span className="text-xs text-slate-400 dark:text-slate-300 mt-1">
               Recipe card, cookbook page, or screenshot
             </span>
           </label>
@@ -286,7 +286,7 @@ export default function ImportPage() {
                 : "Reading recipe from photo..."}
             </p>
           </div>
-          <p className="text-sm text-slate-400 dark:text-slate-500">
+          <p className="text-sm text-slate-400 dark:text-slate-300">
             {tab === "photo"
               ? "Using AI to extract the recipe. This may take 10-15 seconds."
               : "This may take a few seconds."}
@@ -309,7 +309,7 @@ export default function ImportPage() {
                     {preview.description}
                   </p>
                 )}
-                <div className="flex gap-3 text-xs text-slate-400 dark:text-slate-500 mt-2">
+                <div className="flex gap-3 text-xs text-slate-400 dark:text-slate-300 mt-2">
                   {preview.servings && <span>{preview.servings} servings</span>}
                   {preview.prep_time && (
                     <span>{preview.prep_time} min prep</span>
@@ -385,12 +385,12 @@ export default function ImportPage() {
       {/* Help text */}
       {!loading && !preview && !error && (
         <div className="text-center py-8">
-          <p className="text-sm text-slate-400 dark:text-slate-500">
+          <p className="text-sm text-slate-400 dark:text-slate-300">
             {tab === "url"
               ? "Paste a URL from any recipe website. We'll extract the title, ingredients, and instructions automatically."
               : "Upload a photo of a recipe card, cookbook page, or screenshot. AI will read and extract the recipe for you."}
           </p>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
+          <p className="text-xs text-slate-400 dark:text-slate-300 mt-2">
             If import fails, you can always{" "}
             <Link href="/recipes/new" className="text-teal-600 dark:text-teal-400 underline">
               add it manually

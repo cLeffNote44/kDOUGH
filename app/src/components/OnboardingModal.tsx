@@ -202,7 +202,7 @@ export default function OnboardingModal() {
         {step < STEPS.length - 1 && (
           <button
             onClick={handleComplete}
-            className="mt-4 text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+            className="mt-4 text-xs text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white transition-colors"
           >
             Skip tour
           </button>

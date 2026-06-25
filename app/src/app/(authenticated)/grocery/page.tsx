@@ -103,7 +103,7 @@ export default async function GroceryPage({
         <div className="text-center py-16 glass rounded-xl border border-slate-200/60 dark:border-slate-700/40">
           <EmptyGroceryIllustration />
           <p className="text-slate-500 dark:text-slate-400 mb-2">No grocery list yet</p>
-          <p className="text-sm text-slate-400 dark:text-slate-500">
+          <p className="text-sm text-slate-400 dark:text-slate-300">
             Plan your meals for the week, then hit &ldquo;Generate from
             Plan&rdquo; to create your shopping list.
           </p>

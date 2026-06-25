@@ -90,7 +90,7 @@ export default function RecipeCard({
         )}
         <div className="flex items-center justify-between mt-2">
           {(prep_time || cook_time) ? (
-            <p className="text-xs text-slate-400 dark:text-slate-500">
+            <p className="text-xs text-slate-400 dark:text-slate-300">
               {prep_time ? `${prep_time}m prep` : ""}
               {prep_time && cook_time ? " · " : ""}
               {cook_time ? `${cook_time}m cook` : ""}

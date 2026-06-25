@@ -81,7 +81,7 @@ export default function RecipeImageField({
           </button>
         </div>
       ) : (
-        <div className="w-full aspect-[16/9] rounded-lg border border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center text-sm text-slate-400 dark:text-slate-500 mb-2">
+        <div className="w-full aspect-[16/9] rounded-lg border border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center text-sm text-slate-400 dark:text-slate-300 mb-2">
           No photo yet
         </div>
       )}
