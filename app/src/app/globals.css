@@ -40,11 +40,11 @@ body {
 }
 
 :is(.dark, .dark *) .glass {
-  background: rgba(15, 23, 42, 0.7);
+  background: rgba(30, 41, 59, 0.7);
 }
 
 :is(.dark, .dark *) .glass-strong {
-  background: rgba(15, 23, 42, 0.88);
+  background: rgba(30, 41, 59, 0.88);
 }
 
 /* ── Gradient button ──────────────────────────── */
