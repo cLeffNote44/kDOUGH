@@ -21,6 +21,7 @@ export default function RecipeDetailModal({
 }: RecipeDetailModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [servings, setServings] = useState(r.servings > 0 ? r.servings : 1);
+  const [hasImageError, setHasImageError] = useState(false);
 
   // Scale ingredients when servings change
   const scaledIngredients = useMemo(
@@ -77,13 +78,13 @@ export default function RecipeDetailModal({
         {/* Scrollable content */}
         <div className="overflow-y-auto flex-1 p-4 space-y-4">
           {/* Recipe image */}
-          {r.image_url && (
+          {r.image_url && !hasImageError && (
             <div className="rounded-lg overflow-hidden -mx-1">
               <img
                 src={r.image_url}
                 alt={r.title}
                 className="w-full h-40 object-cover"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                onError={() => setHasImageError(true)}
               />
             </div>
           )}

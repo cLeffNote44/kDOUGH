@@ -12,6 +12,12 @@ export default defineConfig({
     environment: "node",
     include: ["src/**/*.test.{ts,tsx}"],
     setupFiles: ["./vitest.setup.ts"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "lcov"],
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: ["src/**/*.test.{ts,tsx}", "src/**/*.d.ts", "src/types/**"],
+    },
   },
   resolve: {
     alias: {

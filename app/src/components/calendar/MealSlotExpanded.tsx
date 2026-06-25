@@ -61,7 +61,9 @@ export default function MealSlotExpanded({
           {tags.map((tag) => (
             <span
               key={tag}
-              className={`text-[9px] px-1.5 py-0.5 rounded-full ${mt.bg} ${mt.accent} border border-current/10`}
+              // Distinct surface from the parent (which is also mt.bg) so the
+              // chip reads as a separate element with adequate contrast.
+              className={`text-[9px] px-1.5 py-0.5 rounded-full bg-white/70 dark:bg-black/25 ${mt.accent} border border-current/10`}
             >
               {tag}
             </span>

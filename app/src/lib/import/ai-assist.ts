@@ -20,6 +20,37 @@ import type { ScrapedRecipe } from "./scraper";
 // snapshot retired 2026-06-15 (requests now 404), which silently broke both
 // the URL AI-fallback and photo OCR. Defined once so future bumps touch one line.
 const RECIPE_MODEL = "claude-sonnet-4-6";
+// Cheaper/faster fallback tried only when the primary model errors (e.g. an
+// overload/529 the SDK couldn't ride out) — not on a clean "no recipe found".
+const FALLBACK_MODEL = "claude-haiku-4-5";
+
+// Tiny in-memory LRU so re-importing identical content (a retry, or two users
+// importing the same public recipe in web mode) doesn't re-pay for extraction.
+const CACHE_MAX = 50;
+const extractionCache = new Map<string, ScrapedRecipe>();
+
+function cheapHash(s: string): string {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return `${h}:${s.length}`;
+}
+
+function cacheGet(key: string): ScrapedRecipe | null {
+  const v = extractionCache.get(key);
+  if (v) {
+    extractionCache.delete(key);
+    extractionCache.set(key, v); // bump to most-recently-used
+  }
+  return v ?? null;
+}
+
+function cacheSet(key: string, value: ScrapedRecipe): void {
+  extractionCache.set(key, value);
+  if (extractionCache.size > CACHE_MAX) {
+    const oldest = extractionCache.keys().next().value;
+    if (oldest !== undefined) extractionCache.delete(oldest);
+  }
+}
 
 // Generous ceiling so long recipes (many ingredients + detailed steps) aren't
 // truncated mid-output. We still check stop_reason to detect truncation.
@@ -166,44 +197,50 @@ async function runExtraction(
   content: Anthropic.ContentBlockParam[],
   sourceUrl: string
 ): Promise<ScrapedRecipe | null> {
-  let message: Anthropic.Message;
-  try {
-    message = await client.messages.create(
-      {
-        model: RECIPE_MODEL,
-        max_tokens: MAX_TOKENS,
-        system: SYSTEM_PROMPT,
-        tools: [RECIPE_TOOL],
-        tool_choice: { type: "tool", name: "extract_recipe" },
-        messages: [{ role: "user", content }],
-      },
-      { timeout: REQUEST_TIMEOUT_MS }
-    );
-  } catch (err) {
-    // Surface upstream failures (auth, overload, timeout) instead of swallowing
-    // them — the caller still returns a generic message to the user.
-    console.error("aiExtract request failed:", err);
+  // Try the primary model, then the cheaper fallback ONLY if the primary call
+  // throws (overload/timeout) — a clean "no recipe found" does not retry.
+  for (const model of [RECIPE_MODEL, FALLBACK_MODEL]) {
+    let message: Anthropic.Message;
+    try {
+      message = await client.messages.create(
+        {
+          model,
+          max_tokens: MAX_TOKENS,
+          system: SYSTEM_PROMPT,
+          tools: [RECIPE_TOOL],
+          tool_choice: { type: "tool", name: "extract_recipe" },
+          messages: [{ role: "user", content }],
+        },
+        { timeout: REQUEST_TIMEOUT_MS }
+      );
+    } catch (err) {
+      // Surface the failure and fall through to the next model (if any).
+      console.error(`aiExtract request failed (${model}):`, err);
+      continue;
+    }
+
+    if (message.stop_reason === "max_tokens") {
+      console.error(
+        "aiExtract: response hit max_tokens; extracted recipe may be incomplete"
+      );
+    }
+
+    // Preferred path: structured tool output.
+    const toolInput = findRecipeToolInput(message);
+    if (toolInput) return mapToScrapedRecipe(toolInput, sourceUrl);
+
+    // Fallback: some responses (refusals, non-tool text) carry a text block.
+    const textBlock = message.content.find((b) => b.type === "text");
+    if (textBlock && textBlock.type === "text") {
+      const parsed = parseAiRecipeJson(textBlock.text);
+      if (parsed) return mapToScrapedRecipe(parsed, sourceUrl);
+    }
+
+    // Got a clean response with no recipe — don't try the other model.
+    console.error("aiExtract: no recipe found in model response");
     return null;
   }
 
-  if (message.stop_reason === "max_tokens") {
-    console.error(
-      "aiExtract: response hit max_tokens; extracted recipe may be incomplete"
-    );
-  }
-
-  // Preferred path: structured tool output.
-  const toolInput = findRecipeToolInput(message);
-  if (toolInput) return mapToScrapedRecipe(toolInput, sourceUrl);
-
-  // Fallback: some responses (refusals, non-tool text) carry a text block.
-  const textBlock = message.content.find((b) => b.type === "text");
-  if (textBlock && textBlock.type === "text") {
-    const parsed = parseAiRecipeJson(textBlock.text);
-    if (parsed) return mapToScrapedRecipe(parsed, sourceUrl);
-  }
-
-  console.error("aiExtract: no recipe found in model response");
   return null;
 }
 
@@ -230,7 +267,11 @@ export async function aiExtractFromHtml(
     .trim();
   const limited = cleaned.length > 100000 ? cleaned.slice(0, 100000) : cleaned;
 
-  return runExtraction(
+  const cacheKey = `html:${cheapHash(limited)}`;
+  const cached = cacheGet(cacheKey);
+  if (cached) return { ...cached, source_url: url };
+
+  const result = await runExtraction(
     client,
     [
       {
@@ -240,6 +281,8 @@ export async function aiExtractFromHtml(
     ],
     url
   );
+  if (result) cacheSet(cacheKey, result);
+  return result;
 }
 
 /**
@@ -252,7 +295,11 @@ export async function aiExtractFromImage(
   const client = getClient();
   if (!client) return null;
 
-  return runExtraction(
+  const cacheKey = `img:${imageBase64.length}:${cheapHash(imageBase64.slice(0, 8192))}`;
+  const cached = cacheGet(cacheKey);
+  if (cached) return cached;
+
+  const result = await runExtraction(
     client,
     [
       {
@@ -266,6 +313,8 @@ export async function aiExtractFromImage(
     ],
     ""
   );
+  if (result) cacheSet(cacheKey, result);
+  return result;
 }
 
 /**

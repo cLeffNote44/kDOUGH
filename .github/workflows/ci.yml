@@ -24,6 +24,10 @@ jobs:
     - name: Install dependencies
       run: cd app && npm ci
 
+    - name: Audit dependencies (high+)
+      run: cd app && npm audit --audit-level=high
+      continue-on-error: true
+
     - name: Run lint
       run: cd app && npm run lint
 
