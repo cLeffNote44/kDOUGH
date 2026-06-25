@@ -14,10 +14,13 @@ const nextConfig: NextConfig = {
   // Pin tracing root to the project directory so the standalone build outputs
   // server.js at .next/standalone/server.js (flat) instead of nesting it
   // under the full filesystem path (Desktop/KaitohDough/app/server.js).
-  // Required for Electron packaging — main.js expects a flat layout. Harmless on
-  // Vercel, which already traces from the project root.
+  // Required for Electron packaging — main.js expects a flat layout.
   // process.cwd() is reliable here because Next.js always runs from the project root.
-  outputFileTracingRoot: process.cwd(),
+  // Gated off on Vercel: with Next 16.2's Turbopack builder a custom tracing root
+  // makes the @vercel/next post-build step look for a `.next/package.json` that is
+  // never written, erroring the deploy. Vercel traces from the project root by
+  // default, so it needs neither this nor `output: standalone`.
+  outputFileTracingRoot: isVercel ? undefined : process.cwd(),
   images: {
     unoptimized: true,
   },
