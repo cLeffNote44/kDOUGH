@@ -1,5 +1,8 @@
 # kDOUGH — Meal Planner
 
+[![CI](https://github.com/cLeffNote44/kDOUGH/actions/workflows/ci.yml/badge.svg)](https://github.com/cLeffNote44/kDOUGH/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 An open-source meal planning and grocery list app. Plan your week, import recipes from any URL, and generate an organized grocery list in one tap.
 
 ## Screenshots

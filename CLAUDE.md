@@ -1,4 +1,4 @@
-# KaitohDough
+# kDOUGH
 
 ## Overview
 AI-powered Electron desktop application built with Next.js 16 and the Anthropic SDK.

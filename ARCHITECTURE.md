@@ -10,7 +10,6 @@ Folder structure, data flow, and key components.
 kDOUGH/
 ├── README.md
 ├── ROADMAP.md
-├── TODO.md
 ├── CHANGELOG.md
 ├── ARCHITECTURE.md
 ├── DECISIONS.md
@@ -144,11 +143,14 @@ kDOUGH/
         │   │   └── middleware.ts    # Session refresh middleware
         │   └── import/
         │       ├── scraper.ts       # 3-tier: JSON-LD → HTML heuristics → AI
-        │       │                    #   Includes SSRF protection + image URL sanitization
+        │       │                    #   Image URL sanitization; fetches via safeFetch
         │       │                    #   Timeout configurable via SCRAPER_TIMEOUT_MS env var
+        │       ├── ssrf.ts          # SSRF guard + safeFetch: blocks private/internal
+        │       │                    #   IPs, re-validating on every redirect hop.
+        │       │                    #   Shared by scraper.ts and the import API route.
         │       ├── parser.ts        # Ingredient parsing, unit normalization,
         │       │                    #   category mapping (100+ ingredients)
-        │       └── ai-assist.ts     # Anthropic Claude for URL fallback + photo OCR
+        │       └── ai-assist.ts     # Anthropic Claude (tool-use) for URL fallback + photo OCR
         │
         └── types/
             └── index.ts             # Canonical types: Ingredient, Recipe,

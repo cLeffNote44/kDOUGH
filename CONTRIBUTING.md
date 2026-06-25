@@ -13,20 +13,19 @@ See [README.md](README.md) for full setup instructions.
 
 ## Making Changes
 
-1. Create a branch from `develop`: `git checkout -b feat/your-feature develop`
+1. Create a branch from `main`: `git checkout -b feat/your-feature main`
 2. Make your changes
-3. Run `npm run lint` and `npm run test` to verify
+3. Run `npm run lint`, `npm run typecheck`, and `npm test` to verify
 4. Commit using [Conventional Commits](https://www.conventionalcommits.org/):
    - `feat(scope): add new feature`
    - `fix(scope): fix a bug`
    - `docs(scope): update documentation`
-5. Push your branch and open a PR against `develop`
+5. Push your branch and open a PR against `main`
 
 ## Branch Strategy
 
-- `main` — stable releases, tagged with semver
-- `develop` — active development, PRs target this branch
-- `feat/*`, `fix/*` — short-lived feature/fix branches
+- `main` — stable, releasable trunk; PRs target this branch
+- `feat/*`, `fix/*` — short-lived feature/fix branches cut from and merged back into `main`
 
 ## Testing
 
