@@ -10,8 +10,10 @@ test.use({ storageState: { cookies: [], origins: [] } });
 test("login page renders the sign-in form", async ({ page }) => {
   await page.goto("/login");
   await expect(page.getByRole("button", { name: /sign in/i })).toBeVisible();
-  await expect(page.getByLabel("Email")).toBeVisible();
-  await expect(page.getByLabel("Password")).toBeVisible();
+  // exact:true — Playwright getByLabel does substring matching, and the
+  // "Show password" toggle's aria-label would otherwise also match "Password".
+  await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
 });
 
 test("an unauthenticated visit to a protected route redirects to /login", async ({

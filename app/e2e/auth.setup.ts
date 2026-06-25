@@ -26,8 +26,9 @@ setup("authenticate", async ({ page }) => {
     .catch(() => {});
 
   await page.goto("/login");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill(password);
+  // exact:true — the "Show password" toggle's aria-label also contains "Password".
+  await page.getByLabel("Email", { exact: true }).fill(email);
+  await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: /sign in/i }).click();
 
   // The middleware redirects to the home planner once the session is set.
