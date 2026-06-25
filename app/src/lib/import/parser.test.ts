@@ -256,16 +256,22 @@ describe("parseQuantity", () => {
     expect(parseQuantity("2.5")).toBe(2.5);
   });
 
-  it("returns 1 for empty string", () => {
-    expect(parseQuantity("")).toBe(1);
+  it("returns null for empty string (no measurable amount)", () => {
+    expect(parseQuantity("")).toBeNull();
   });
 
-  it("returns 1 for whitespace", () => {
-    expect(parseQuantity("  ")).toBe(1);
+  it("returns null for whitespace", () => {
+    expect(parseQuantity("  ")).toBeNull();
   });
 
-  it("returns 1 for non-numeric string", () => {
-    expect(parseQuantity("abc")).toBe(1);
+  it("returns null for non-numeric string ('a pinch', 'to taste')", () => {
+    expect(parseQuantity("abc")).toBeNull();
+    expect(parseQuantity("a pinch")).toBeNull();
+    expect(parseQuantity("to taste")).toBeNull();
+  });
+
+  it("resolves a range to its lower bound ('2-3' -> 2)", () => {
+    expect(parseQuantity("2-3")).toBe(2);
   });
 
   it("parses 1/3", () => {
@@ -396,6 +402,13 @@ describe("categorizeIngredient", () => {
   it("does partial matching", () => {
     expect(categorizeIngredient("fresh spinach leaves")).toBe("produce");
     expect(categorizeIngredient("boneless chicken thighs")).toBe("meat");
+  });
+
+  it("prefers the longest matching key for compound names", () => {
+    // "black pepper" (spices) must win over the shorter "pepper" (produce)
+    expect(categorizeIngredient("freshly ground black pepper")).toBe("spices");
+    // "chicken broth" (pantry) must win over "chicken" (meat)
+    expect(categorizeIngredient("low-sodium chicken broth")).toBe("pantry");
   });
 });
 

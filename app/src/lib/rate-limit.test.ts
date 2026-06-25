@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   checkRateLimit,
   resetRateLimit,
@@ -9,6 +9,10 @@ const config = { maxRequests: 3, windowMs: 1000 };
 
 beforeEach(() => {
   resetAllRateLimits();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 describe("checkRateLimit", () => {
@@ -63,15 +67,19 @@ describe("checkRateLimit", () => {
     expect(checkRateLimit("c", config).remaining).toBe(1);
   });
 
-  it("allows requests again after the window expires", async () => {
-    const shortConfig = { maxRequests: 1, windowMs: 50 };
+  it("allows requests again after the window expires", () => {
+    // Fake timers so the limiter's Date.now() reads are deterministic and the
+    // test doesn't rely on a real-clock sleep (slow + occasionally flaky on CI).
+    vi.useFakeTimers();
+    const base = new Date(2026, 0, 1, 0, 0, 0, 0);
+    vi.setSystemTime(base);
 
+    const shortConfig = { maxRequests: 1, windowMs: 50 };
     checkRateLimit("d", shortConfig);
     expect(checkRateLimit("d", shortConfig).allowed).toBe(false);
 
-    // Wait for the window to expire
-    await new Promise((r) => setTimeout(r, 60));
-
+    // Advance the system clock past the window boundary.
+    vi.setSystemTime(new Date(base.getTime() + 60));
     expect(checkRateLimit("d", shortConfig).allowed).toBe(true);
   });
 });

@@ -11,7 +11,7 @@
 import * as cheerio from "cheerio";
 import { parseIngredientLine } from "./parser";
 import { aiExtractFromHtml } from "./ai-assist";
-import { env } from "@/lib/env";
+import { safeFetch } from "./ssrf";
 import type { Ingredient } from "@/types";
 
 export interface ScrapedRecipe {
@@ -27,22 +27,30 @@ export interface ScrapedRecipe {
 }
 
 /**
- * Parse ISO 8601 duration (PT30M, PT1H30M, etc.) to minutes.
+ * Parse an ISO 8601 duration (PT30M, PT1H30M, P1DT2H, PT45S, …) to minutes.
+ * Handles day and second components (e.g. long marinades use P..D); seconds are
+ * rounded to the nearest minute. Returns null when nothing parsed or the total
+ * is zero (treated as "unspecified").
  */
-function parseDuration(iso: string | undefined | null): number | null {
+export function parseDuration(iso: string | undefined | null): number | null {
   if (!iso || typeof iso !== "string") return null;
-  const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
-  if (!match) return null;
-  const hours = parseInt(match[1] || "0");
-  const minutes = parseInt(match[2] || "0");
-  return hours * 60 + minutes || null;
+  const m = iso
+    .trim()
+    .match(/^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/i);
+  if (!m || (!m[1] && !m[2] && !m[3] && !m[4])) return null;
+  const days = parseInt(m[1] || "0", 10);
+  const hours = parseInt(m[2] || "0", 10);
+  const minutes = parseInt(m[3] || "0", 10);
+  const seconds = parseInt(m[4] || "0", 10);
+  const total = days * 1440 + hours * 60 + minutes + Math.round(seconds / 60);
+  return total > 0 ? total : null;
 }
 
 /**
  * Validate and sanitize an image URL. Allows only http/https protocols
  * and strips anything that could be an injection vector.
  */
-function sanitizeImageUrl(url: string): string {
+export function sanitizeImageUrl(url: string): string {
   if (!url || typeof url !== "string") return "";
   const trimmed = url.trim();
   // Only allow http/https URLs — block javascript:, data:, and other schemes
@@ -55,7 +63,7 @@ function sanitizeImageUrl(url: string): string {
 /**
  * Clean HTML tags from a string.
  */
-function stripHtml(html: string): string {
+export function stripHtml(html: string): string {
   return html
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/?(p|li|div|h\d)[^>]*>/gi, "\n")
@@ -73,7 +81,7 @@ function stripHtml(html: string): string {
 /**
  * Extract recipe from JSON-LD structured data.
  */
-function extractFromJsonLd($: cheerio.CheerioAPI, url: string): ScrapedRecipe | null {
+export function extractFromJsonLd($: cheerio.CheerioAPI, url: string): ScrapedRecipe | null {
   const scripts = $('script[type="application/ld+json"]');
   for (let i = 0; i < scripts.length; i++) {
     try {
@@ -103,20 +111,39 @@ function extractFromJsonLd($: cheerio.CheerioAPI, url: string): ScrapedRecipe | 
         parseIngredientLine(stripHtml(raw))
       );
 
-      // Extract instructions
+      // Extract instructions. Flatten HowToSection groups (whose steps live in
+      // `itemListElement`) so sectioned recipes don't lose their steps.
       let instructions = "";
       if (typeof recipe.recipeInstructions === "string") {
         instructions = stripHtml(recipe.recipeInstructions);
       } else if (Array.isArray(recipe.recipeInstructions)) {
-        instructions = recipe.recipeInstructions
-          .map((step: string | Record<string, string>, idx: number) => {
-            if (typeof step === "string") return `${idx + 1}. ${stripHtml(step)}`;
-            if (step.text) return `${idx + 1}. ${stripHtml(step.text)}`;
-            if (step.name) return `${idx + 1}. ${stripHtml(step.name)}`;
-            return "";
-          })
-          .filter(Boolean)
-          .join("\n\n");
+        const flatSteps: string[] = [];
+        const collect = (items: unknown[]) => {
+          for (const step of items) {
+            if (typeof step === "string") {
+              const t = stripHtml(step);
+              if (t) flatSteps.push(t);
+              continue;
+            }
+            if (step && typeof step === "object") {
+              const s = step as Record<string, unknown>;
+              if (Array.isArray(s.itemListElement)) {
+                collect(s.itemListElement);
+                continue;
+              }
+              const raw =
+                typeof s.text === "string"
+                  ? s.text
+                  : typeof s.name === "string"
+                    ? s.name
+                    : "";
+              const t = stripHtml(raw);
+              if (t) flatSteps.push(t);
+            }
+          }
+        };
+        collect(recipe.recipeInstructions);
+        instructions = flatSteps.map((t, i) => `${i + 1}. ${t}`).join("\n\n");
       }
 
       // Extract image (sanitize to prevent javascript:/data: injection)
@@ -164,7 +191,7 @@ function extractFromJsonLd($: cheerio.CheerioAPI, url: string): ScrapedRecipe | 
 /**
  * Heuristic fallback: extract recipe data from page HTML structure.
  */
-function extractFromHtml($: cheerio.CheerioAPI, url: string): ScrapedRecipe | null {
+export function extractFromHtml($: cheerio.CheerioAPI, url: string): ScrapedRecipe | null {
   // Title: try common recipe title selectors
   const titleSelectors = [
     "h1.recipe-title",
@@ -250,7 +277,7 @@ function extractFromHtml($: cheerio.CheerioAPI, url: string): ScrapedRecipe | nu
   }
 
   // Description
-  let description =
+  const description =
     $('meta[name="description"]').attr("content") ||
     $('meta[property="og:description"]').attr("content") ||
     "";
@@ -276,14 +303,15 @@ function extractFromHtml($: cheerio.CheerioAPI, url: string): ScrapedRecipe | nu
  * Main entry point: scrape a recipe from a URL.
  */
 export async function scrapeRecipe(url: string): Promise<ScrapedRecipe> {
-  // Fetch the page
-  const response = await fetch(url, {
+  // Fetch the page through the SSRF-safe wrapper, which re-validates the
+  // private-IP guard on every redirect hop (a plain fetch would follow a
+  // redirect to an internal address without re-checking).
+  const response = await safeFetch(url, {
     headers: {
       "User-Agent":
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       Accept: "text/html,application/xhtml+xml",
     },
-    signal: AbortSignal.timeout(env.scraperTimeoutMs),
   });
 
   if (!response.ok) {

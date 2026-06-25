@@ -72,6 +72,10 @@ export default function PullToRefresh({
         className="flex items-center justify-center overflow-hidden md:hidden"
         style={{
           height: pullDistance > 0 ? `${pullDistance}px` : 0,
+          // Intentional ref read: disables the height transition while the
+          // finger is down. pullDistance setState always re-renders alongside
+          // isPulling changes, so the read is current.
+          // eslint-disable-next-line react-hooks/refs
           transition: isPulling.current ? "none" : "height 0.2s ease-out",
         }}
       >

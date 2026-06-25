@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { assignRecipeToDay } from "@/lib/actions";
 import type { Recipe } from "@/types";
 import { EmptySearchIllustration } from "@/components/ui/EmptyStateIllustrations";
+import { useFocusTrap } from "@/components/useFocusTrap";
 
 interface RecipePickerProps {
   date: string;
@@ -30,7 +31,7 @@ export default function RecipePicker({ date, dayLabel, mealType, onClose }: Reci
           .select("*")
           .order("title");
         if (error) throw error;
-        setRecipes((data as Recipe[]) ?? []);
+        setRecipes((data as unknown as Recipe[]) ?? []);
       } catch {
         toast.error("Failed to load recipes");
       } finally {
@@ -52,14 +53,8 @@ export default function RecipePicker({ date, dayLabel, mealType, onClose }: Reci
     return () => document.removeEventListener("mousedown", handleClick);
   }, [onClose]);
 
-  // Close on escape
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [onClose]);
+  // Focus trap + Escape-to-close + focus restore.
+  useFocusTrap(modalRef, onClose);
 
   const filtered = recipes
     .filter((r) => r.title.toLowerCase().includes(search.toLowerCase()))
@@ -91,11 +86,14 @@ export default function RecipePicker({ date, dayLabel, mealType, onClose }: Reci
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
       <div
         ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="recipe-picker-title"
         className="glass-strong rounded-xl shadow-lg w-full max-w-md mx-4 max-h-[70vh] flex flex-col border border-stone-200/60 dark:border-stone-700/40"
       >
         <div className="p-4 border-b border-stone-200/60 dark:border-stone-700/40">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-display font-semibold text-stone-900 dark:text-stone-100">
+            <h2 id="recipe-picker-title" className="font-display font-semibold text-stone-900 dark:text-stone-100">
               {dayLabel} {mealType.charAt(0).toUpperCase() + mealType.slice(1)} &middot; {formattedDate}
             </h2>
             <button

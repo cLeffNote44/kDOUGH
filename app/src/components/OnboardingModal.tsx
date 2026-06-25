@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useFocusTrap } from "@/components/useFocusTrap";
 
 const STEPS = [
   {
@@ -38,7 +39,7 @@ const STEPS = [
   {
     title: "Plan Your Week",
     description:
-      "Drag and drop recipes onto your weekly calendar. Tap any empty meal slot to quickly add a recipe.",
+      "Tap any empty meal slot to add a recipe. Tap a planned meal to move, change, or remove it — and drag-and-drop works too on desktop.",
     illustration: (
       <svg
         className="w-24 h-24 text-amber-500"
@@ -112,10 +113,14 @@ const STEPS = [
 export default function OnboardingModal() {
   const [step, setStep] = useState(0);
   const [show, setShow] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Check localStorage for persistence across sessions (already implemented)
+    // Check localStorage for persistence across sessions. localStorage is
+    // client-only, so showing the modal must happen post-hydration, not during
+    // render — the setState-in-effect here is intentional.
     const onboarded = localStorage.getItem("kd-onboarded");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!onboarded) setShow(true);
   }, []);
 
@@ -124,11 +129,21 @@ export default function OnboardingModal() {
     setShow(false);
   };
 
+  // Focus trap + Escape-to-dismiss (completes the tour) + focus restore.
+  // `show` gates it since this component stays mounted while hidden.
+  useFocusTrap(modalRef, handleComplete, show);
+
   if (!show) return null;
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[60]">
-      <div className="glass-strong rounded-2xl shadow-lg w-full max-w-sm mx-4 p-6 border border-stone-200/60 dark:border-stone-700/40 text-center">
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="onboarding-title"
+        className="glass-strong rounded-2xl shadow-lg w-full max-w-sm mx-4 p-6 border border-stone-200/60 dark:border-stone-700/40 text-center"
+      >
         {/* Step dots */}
         <div className="flex justify-center gap-2 mb-6">
           {STEPS.map((_, i) => (
@@ -149,7 +164,7 @@ export default function OnboardingModal() {
         </div>
 
         {/* Title & description */}
-        <h2 className="font-display font-semibold text-lg text-stone-900 dark:text-stone-100 mb-2">
+        <h2 id="onboarding-title" className="font-display font-semibold text-lg text-stone-900 dark:text-stone-100 mb-2">
           {STEPS[step].title}
         </h2>
         <p className="text-sm text-stone-500 dark:text-stone-400 mb-6 leading-relaxed">

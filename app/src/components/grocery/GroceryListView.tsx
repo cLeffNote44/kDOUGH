@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useMemo, useTransition } from "react";
 import { toast } from "sonner";
 import { toggleGroceryItem, removeGroceryItem } from "@/lib/actions";
+import { formatQuantity } from "@/lib/import/parser";
 import type { GroceryItem } from "@/types";
 import AddItemForm from "./AddItemForm";
 import SwipeableItem from "./SwipeableItem";
@@ -43,9 +44,10 @@ const CATEGORY_ICONS: Record<string, string> = {
 
 function formatItemDisplay(item: GroceryItem): string {
   const parts: string[] = [];
-  if (item.quantity != null && item.quantity > 0) {
-    const q = item.quantity;
-    parts.push(q === Math.floor(q) ? q.toString() : q.toFixed(1).replace(/\.0$/, ""));
+  // Hide a lone quantity of 1 (e.g. "1 egg" reads better as "egg"); otherwise
+  // pretty-print fractions ("1 1/2 cup") via the shared formatter.
+  if (item.quantity != null && item.quantity !== 1) {
+    parts.push(formatQuantity(item.quantity));
   }
   if (item.unit) {
     parts.push(item.unit);
@@ -147,12 +149,25 @@ export default function GroceryListView({
     localStorage.setItem("kd-grocery-sort", sortMode);
   }, [sortMode]);
 
-  // Split into unchecked and checked
-  const unchecked = optimisticItems.filter((i) => !i.checked);
-  const checked = optimisticItems.filter((i) => i.checked);
+  // Pantry staples are shown in a separate collapsed section, not the buy list.
+  const mainItems = optimisticItems.filter((i) => !i.is_pantry);
+  const pantryItems = optimisticItems.filter((i) => i.is_pantry);
 
-  // Group unchecked items based on sort mode
-  const groups = groupItems(unchecked, sortMode, recipeMap);
+  // Split the buy list into unchecked and checked.
+  const unchecked = mainItems.filter((i) => !i.checked);
+  const checked = mainItems.filter((i) => i.checked);
+
+  // Group unchecked items based on sort mode (memoized — groupItems sorts and
+  // builds Maps; the linear filter above is cheap and left as-is).
+  const groups = useMemo(
+    () =>
+      groupItems(
+        optimisticItems.filter((i) => !i.is_pantry && !i.checked),
+        sortMode,
+        recipeMap
+      ),
+    [optimisticItems, sortMode, recipeMap]
+  );
 
   const handleToggle = (itemId: string, currentChecked: boolean) => {
     const newChecked = !currentChecked;
@@ -192,7 +207,80 @@ export default function GroceryListView({
     setOptimisticItems((prev) => [...prev, newItem]);
   };
 
-  const totalItems = optimisticItems.length;
+  const handleItemReconciled = (tempId: string, realItem: GroceryItem) => {
+    setOptimisticItems((prev) =>
+      prev.map((i) => (i.id === tempId ? realItem : i))
+    );
+  };
+
+  const handleItemFailed = (tempId: string) => {
+    setOptimisticItems((prev) => prev.filter((i) => i.id !== tempId));
+  };
+
+  // ── Export / share ────────────────────────────
+  const escapeHtml = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  // Build a category-grouped plaintext + printable HTML of what still needs buying.
+  const buildShare = (): { text: string; html: string } => {
+    const byCat = groupItems(unchecked, "category", recipeMap);
+    const textLines: string[] = ["Grocery List", ""];
+    const htmlParts: string[] = ["<h1>Grocery List</h1>"];
+    for (const g of byCat) {
+      textLines.push(g.label.toUpperCase());
+      htmlParts.push(`<h2>${escapeHtml(g.label)}</h2><ul>`);
+      for (const it of g.items) {
+        const line = formatItemDisplay(it);
+        textLines.push(`- ${line}`);
+        htmlParts.push(`<li>&#9744; ${escapeHtml(line)}</li>`);
+      }
+      htmlParts.push("</ul>");
+      textLines.push("");
+    }
+    return { text: textLines.join("\n").trim(), html: htmlParts.join("") };
+  };
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(buildShare().text);
+      toast.success("List copied to clipboard");
+    } catch {
+      toast.error("Couldn't copy the list");
+    }
+  };
+
+  const handleShare = async () => {
+    const { text } = buildShare();
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({ title: "Grocery List", text });
+      } catch {
+        // User cancelled or share failed — no-op.
+      }
+    } else {
+      await handleCopy();
+    }
+  };
+
+  const handlePrint = () => {
+    const { html } = buildShare();
+    const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Grocery List</title><style>body{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;padding:24px;color:#1c1917}h1{font-size:18px;margin:0 0 8px}h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#78716c;margin:16px 0 4px;border-bottom:1px solid #e7e5e4;padding-bottom:2px}ul{list-style:none;padding:0;margin:0}li{padding:3px 0;font-size:14px}</style></head><body>${html}</body></html>`;
+    // Print via a hidden iframe — works in the browser and the Electron build
+    // (where window.open is denied).
+    const iframe = document.createElement("iframe");
+    iframe.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;";
+    document.body.appendChild(iframe);
+    const idoc = iframe.contentWindow?.document;
+    if (!idoc) return;
+    idoc.open();
+    idoc.write(doc);
+    idoc.close();
+    iframe.contentWindow?.focus();
+    iframe.contentWindow?.print();
+    setTimeout(() => document.body.removeChild(iframe), 1000);
+  };
+
+  const totalItems = mainItems.length;
   const checkedCount = checked.length;
 
   return (
@@ -216,6 +304,30 @@ export default function GroceryListView({
               }}
             />
           </div>
+        </div>
+      )}
+
+      {/* Export / share toolbar */}
+      {unchecked.length > 0 && (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCopy}
+            className="px-3 py-1.5 text-xs font-medium rounded-lg glass border border-stone-200/60 dark:border-stone-700/40 text-stone-600 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+          >
+            Copy
+          </button>
+          <button
+            onClick={handlePrint}
+            className="px-3 py-1.5 text-xs font-medium rounded-lg glass border border-stone-200/60 dark:border-stone-700/40 text-stone-600 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+          >
+            Print
+          </button>
+          <button
+            onClick={handleShare}
+            className="px-3 py-1.5 text-xs font-medium rounded-lg glass border border-stone-200/60 dark:border-stone-700/40 text-stone-600 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+          >
+            Share
+          </button>
         </div>
       )}
 
@@ -294,7 +406,12 @@ export default function GroceryListView({
       ))}
 
       {/* Add manual item */}
-      <AddItemForm listId={listId} onItemAdded={handleItemAdded} />
+      <AddItemForm
+        listId={listId}
+        onItemAdded={handleItemAdded}
+        onItemReconciled={handleItemReconciled}
+        onItemFailed={handleItemFailed}
+      />
 
       {/* Checked items (collapsed section) */}
       {checked.length > 0 && (
@@ -331,6 +448,29 @@ export default function GroceryListView({
                 <span className="flex-1 text-stone-400 dark:text-stone-500 text-[15px] line-through">
                   {formatItemDisplay(item)}
                 </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Pantry staples (you likely already have these) */}
+      {pantryItems.length > 0 && (
+        <div className="glass rounded-xl border border-stone-200/60 dark:border-stone-700/40 overflow-hidden opacity-75">
+          <div className="px-4 py-2.5 bg-stone-50/80 dark:bg-stone-800/60 border-b border-stone-200/60 dark:border-stone-700/40">
+            <h2 className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide flex items-center gap-1.5">
+              <span className="text-base" aria-hidden="true">🥫</span>
+              Staples — you likely have these ({pantryItems.length})
+            </h2>
+          </div>
+          <ul className="divide-y divide-stone-100 dark:divide-stone-800">
+            {pantryItems.map((item) => (
+              <li
+                key={item.id}
+                className="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400"
+              >
+                <span className="text-base" aria-hidden="true">·</span>
+                <span className="flex-1 text-[15px]">{formatItemDisplay(item)}</span>
               </li>
             ))}
           </ul>

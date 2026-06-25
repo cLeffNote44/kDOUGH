@@ -1,13 +1,26 @@
 import type { NextConfig } from "next";
 
+// Standalone output is needed ONLY for Electron packaging (main.js loads the
+// flat .next/standalone/server.js). It must NOT be set on Vercel: Vercel manages
+// its own build output, and since Next 16.2's Turbopack builder the standalone
+// layout stopped writing the .next/package.json that Vercel's post-build step
+// expects — which made every Vercel deploy fail with `ENOENT ... .next/package.json`.
+// Vercel always sets VERCEL=1 during builds, so gate standalone off there and
+// keep it for local/Electron builds.
+const isVercel = !!process.env.VERCEL;
+
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: isVercel ? undefined : "standalone",
   // Pin tracing root to the project directory so the standalone build outputs
   // server.js at .next/standalone/server.js (flat) instead of nesting it
   // under the full filesystem path (Desktop/KaitohDough/app/server.js).
   // Required for Electron packaging — main.js expects a flat layout.
   // process.cwd() is reliable here because Next.js always runs from the project root.
-  outputFileTracingRoot: process.cwd(),
+  // Gated off on Vercel: with Next 16.2's Turbopack builder a custom tracing root
+  // makes the @vercel/next post-build step look for a `.next/package.json` that is
+  // never written, erroring the deploy. Vercel traces from the project root by
+  // default, so it needs neither this nor `output: standalone`.
+  outputFileTracingRoot: isVercel ? undefined : process.cwd(),
   images: {
     unoptimized: true,
   },

@@ -50,7 +50,17 @@ function waitForServer(port, timeout = 30000) {
 
     function check() {
       const req = http.get(`http://localhost:${port}`, (res) => {
-        resolve();
+        res.resume(); // drain the response so the socket is freed
+        // Only treat the server as ready on a real (non-5xx) response. A 5xx
+        // means it booted but is erroring, so keep polling until it recovers
+        // or the timeout fires.
+        if (res.statusCode && res.statusCode < 500) {
+          resolve();
+        } else if (Date.now() - start > timeout) {
+          reject(new Error("Server startup timeout"));
+        } else {
+          setTimeout(check, 300);
+        }
       });
       req.on("error", () => {
         if (Date.now() - start > timeout) {
@@ -120,6 +130,24 @@ function resolveStandalonePaths() {
 // NEXT.JS SERVER MANAGEMENT
 // ============================================
 
+/**
+ * Read optional user configuration (e.g. an Anthropic API key) from a JSON file
+ * in the OS app-data directory, so the packaged app can enable AI features
+ * without baking secrets into the binary. Returns {} if absent/unreadable.
+ *   macOS: ~/Library/Application Support/kDOUGH/config.json
+ */
+function loadUserConfig() {
+  try {
+    const cfgPath = path.join(app.getPath("userData"), "config.json");
+    if (fs.existsSync(cfgPath)) {
+      return JSON.parse(fs.readFileSync(cfgPath, "utf8")) || {};
+    }
+  } catch (err) {
+    console.warn("[Electron] Could not read user config:", err);
+  }
+  return {};
+}
+
 function startNextServer() {
   if (isDev) {
     // In development, use `next dev`
@@ -143,17 +171,36 @@ function startNextServer() {
       return;
     }
 
+    // ANTHROPIC_API_KEY is a runtime (non-NEXT_PUBLIC_) var that Next.js never
+    // inlines, so the packaged app has no key unless we supply one. Read it from
+    // a user config file (and fall back to the build/launch environment) so AI
+    // import works in the shipped binary.
+    const userConfig = loadUserConfig();
+    const anthropicKey =
+      process.env.ANTHROPIC_API_KEY || userConfig.ANTHROPIC_API_KEY;
+
     nextProcess = spawn(process.execPath, ["--no-warnings", serverPath], {
       cwd: standalonePath,
+      // Make the child its own process-group leader so killNextProcess can
+      // signal the whole subtree via process.kill(-pid) and not orphan children.
+      detached: true,
       env: {
         ...process.env,
         PORT: String(activePort),
         HOSTNAME: "localhost",
         // Electron sets this; Next.js standalone needs it unset to run as plain Node
         ELECTRON_RUN_AS_NODE: "1",
+        ...(anthropicKey ? { ANTHROPIC_API_KEY: anthropicKey } : {}),
       },
     });
   }
+
+  // Surface spawn failures (bad execPath, EACCES, …) immediately instead of
+  // letting them masquerade as a 30s startup timeout. An unhandled "error"
+  // event would otherwise crash the main process.
+  nextProcess.on("error", (err) => {
+    console.error("[Next.js] Failed to start server process:", err);
+  });
 
   nextProcess.stdout?.on("data", (data) => {
     console.log(`[Next.js] ${data}`);
@@ -325,6 +372,15 @@ function createWindow() {
     return { action: "deny" };
   });
 
+  // Pin top-level navigation to the local app origin; externalize anything else
+  // so a malicious link/redirect can't load a remote origin in the app chrome.
+  mainWindow.webContents.on("will-navigate", (event, url) => {
+    if (!url.startsWith(`http://localhost:${activePort}`)) {
+      event.preventDefault();
+      if (url.startsWith("http")) shell.openExternal(url);
+    }
+  });
+
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
@@ -366,9 +422,14 @@ app.whenReady().then(async () => {
     return;
   }
 
-  // Server is ready — show main window, close splash
+  // Server is ready — show main window, then close the splash once the main
+  // window has actually painted (avoids a brief no-window gap).
   createWindow();
-  splash.close();
+  if (mainWindow) {
+    mainWindow.once("ready-to-show", () => splash.close());
+  } else {
+    splash.close();
+  }
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {

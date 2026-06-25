@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import FavoriteButton from "./FavoriteButton";
 
@@ -59,12 +58,14 @@ export default function RecipeCard({
           <FavoriteButton recipeId={id} initialFavorite={is_favorite} size="sm" />
         </div>
         {image_url && !imgError ? (
-          <Image
+          // next/image gives no benefit with images.unoptimized (no optimizer in
+          // the Electron standalone build), so use a plain lazy <img> — matches
+          // RecipeDetailModal and the import preview.
+          <img
             src={image_url}
             alt={title}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             onError={() => setImgError(true)}
           />
         ) : (

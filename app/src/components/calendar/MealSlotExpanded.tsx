@@ -7,6 +7,7 @@ interface MealSlotExpandedProps {
   onChangeRecipe: () => void;
   onRemove: () => void;
   onViewFull: () => void;
+  onMove: () => void;
 }
 
 export default function MealSlotExpanded({
@@ -15,6 +16,7 @@ export default function MealSlotExpanded({
   onChangeRecipe,
   onRemove,
   onViewFull,
+  onMove,
 }: MealSlotExpandedProps) {
   const recipe = plan.recipes;
   const prep = recipe.prep_time;
@@ -59,7 +61,9 @@ export default function MealSlotExpanded({
           {tags.map((tag) => (
             <span
               key={tag}
-              className={`text-[9px] px-1.5 py-0.5 rounded-full ${mt.bg} ${mt.accent} border border-current/10`}
+              // Distinct surface from the parent (which is also mt.bg) so the
+              // chip reads as a separate element with adequate contrast.
+              className={`text-[9px] px-1.5 py-0.5 rounded-full bg-white/70 dark:bg-black/25 ${mt.accent} border border-current/10`}
             >
               {tag}
             </span>
@@ -68,7 +72,13 @@ export default function MealSlotExpanded({
       )}
 
       {/* Action buttons */}
-      <div className="flex gap-1.5 pt-0.5">
+      <div className="flex flex-wrap gap-1.5 pt-0.5">
+        <button
+          onClick={onMove}
+          className={`flex-1 text-[10px] font-medium py-1 rounded-md ${mt.accent} hover:underline`}
+        >
+          Move
+        </button>
         <button
           onClick={onChangeRecipe}
           className={`flex-1 text-[10px] font-medium py-1 rounded-md ${mt.accent} hover:underline`}

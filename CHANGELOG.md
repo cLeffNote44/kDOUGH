@@ -63,14 +63,14 @@ Running log of what got done and when. Most recent entries first.
 - **Pull-to-refresh** — Native gesture for mobile/PWA
 - **Keyboard shortcuts** — Power-user shortcuts
 
-See `UI Upgrades.md` for the full 25-item checklist.
+_(The detailed UI-upgrades checklist was an internal working doc, not included in the public repo.)_
 
 ---
 
 ## 2026-03-07 — Issues & Gaps Pass
 
 ### Added
-- **ISSUES_AND_GAPS.md** — Comprehensive list of known issues, prioritized for single-user → App Store path.
+- **Known-issues pass** — Comprehensive list of known issues, prioritized for single-user → App Store path _(internal working doc, not in the public repo)_.
 - **Zod validation** — `lib/validations.ts` with schemas for recipe form, imported recipe, UUIDs, meal types.
 - **Input validation on all server actions** — createRecipe, updateRecipe, deleteRecipe, saveImportedRecipe, assignRecipeToDay, removeRecipeFromDay, toggleGroceryItem, addManualGroceryItem, removeGroceryItem now validate inputs and return clear errors.
 
@@ -83,7 +83,6 @@ See `UI Upgrades.md` for the full 25-item checklist.
 - **README** — Updated Supabase auth section for email/password (removed magic link wording).
 
 ### Files changed
-- `ISSUES_AND_GAPS.md` — New file.
 - `app/src/lib/validations.ts` — New file.
 - `app/src/lib/actions.ts` — Zod validation, UUID/mealType validation, user_id in meal plan.
 - `app/src/lib/import/ai-assist.ts` — `parseAiRecipeJson` helper, safe type coercion.

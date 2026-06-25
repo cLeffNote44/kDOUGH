@@ -3,12 +3,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { Ingredient } from "@/types";
+import type { Ingredient, GroceryItem, PantryItem } from "@/types";
+import { categorizeIngredient } from "@/lib/import/parser";
 import {
-  categorizeIngredient,
-  consolidateIngredients,
-  type RawGroceryIngredient,
-} from "@/lib/import/parser";
+  aggregateMealPlanIngredients,
+  type MealPlanWithRecipe,
+} from "@/lib/grocery-aggregate";
+import { isAiAvailable, getAnthropicClient } from "@/lib/import/ai-assist";
+import { generateWeekPlan, type PlanRecipe } from "@/lib/meal-plan-ai";
 import {
   recipeFormSchema,
   importedRecipeSchema,
@@ -172,6 +174,11 @@ export async function updateRecipe(id: string, formData: FormData) {
 }
 
 export async function deleteRecipe(id: string) {
+  // Note: meal_plans referencing this recipe cascade-delete (FK ON DELETE
+  // CASCADE), but already-generated grocery_items keep this id in their
+  // recipe_ids[] array (no element FKs in Postgres). That's intentional —
+  // grocery lists are point-in-time snapshots; the recipe view degrades to
+  // "Unknown" and regenerating the list self-corrects.
   const idResult = uuidSchema.safeParse(id);
   if (!idResult.success) {
     return { error: "Invalid recipe ID" };
@@ -296,6 +303,50 @@ export async function toggleFavorite(recipeId: string) {
 // MEAL PLAN ACTIONS
 // ============================================
 
+type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
+
+/**
+ * Upsert a recipe into a (user, date, meal_type) slot, replacing whatever is
+ * there. The per-user UNIQUE(user_id, date, meal_type) constraint makes the
+ * upsert atomic; the delete+insert fallback only fires on a DB missing that
+ * constraint (e.g. migration 20260624000002 not yet applied). Shared by
+ * assignRecipeToDay and moveRecipeToSlot.
+ */
+async function upsertMealPlanSlot(
+  supabase: SupabaseServerClient,
+  userId: string,
+  recipeId: string,
+  date: string,
+  mealType: string
+): Promise<{ error?: string }> {
+  const { error: upsertError } = await supabase
+    .from("meal_plans")
+    .upsert(
+      { user_id: userId, recipe_id: recipeId, date, meal_type: mealType },
+      { onConflict: "user_id,date,meal_type" }
+    );
+  if (!upsertError) return {};
+
+  await supabase
+    .from("meal_plans")
+    .delete()
+    .eq("user_id", userId)
+    .eq("date", date)
+    .eq("meal_type", mealType);
+
+  const { error } = await supabase.from("meal_plans").insert({
+    user_id: userId,
+    recipe_id: recipeId,
+    date,
+    meal_type: mealType,
+  });
+  if (error) {
+    console.error("upsertMealPlanSlot DB error:", error);
+    return { error: "Failed to save the meal. Please try again." };
+  }
+  return {};
+}
+
 export async function assignRecipeToDay(
   recipeId: string,
   date: string,
@@ -310,55 +361,24 @@ export async function assignRecipeToDay(
   if (!mealTypeResult.success) {
     return { error: "Invalid meal type" };
   }
-  const validMealType = mealTypeResult.data;
 
   // Validate date format (YYYY-MM-DD) and ensure it's a real date
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || isNaN(new Date(date + "T00:00:00").getTime())) {
     return { error: "Invalid date" };
   }
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return { error: "Not authenticated" };
-  }
+  const auth = await requireAuth();
+  if (auth.error) return { error: auth.error };
+  const { supabase, user } = auth;
 
-  // Atomic upsert: replace any existing plan for this date+meal_type slot.
-  // Requires a unique constraint on (user_id, date, meal_type) in Supabase.
-  // Fallback: delete-then-insert if no unique constraint exists.
-  const { error: upsertError } = await supabase
-    .from("meal_plans")
-    .upsert(
-      {
-        user_id: user.id,
-        recipe_id: recipeIdResult.data,
-        date,
-        meal_type: validMealType,
-      },
-      { onConflict: "user_id,date,meal_type" }
-    );
-
-  if (upsertError) {
-    // Fallback: unique constraint may not exist yet — use delete+insert
-    await supabase
-      .from("meal_plans")
-      .delete()
-      .eq("user_id", user.id)
-      .eq("date", date)
-      .eq("meal_type", validMealType);
-
-    const { error } = await supabase.from("meal_plans").insert({
-      user_id: user.id,
-      recipe_id: recipeIdResult.data,
-      date,
-      meal_type: validMealType,
-    });
-
-    if (error) {
-      console.error("assignRecipeToDay DB error:", error);
-      return { error: "Failed to assign recipe. Please try again." };
-    }
-  }
+  const result = await upsertMealPlanSlot(
+    supabase,
+    user.id,
+    recipeIdResult.data,
+    date,
+    mealTypeResult.data
+  );
+  if (result.error) return { error: result.error };
 
   revalidatePath("/");
   return { success: true };
@@ -378,15 +398,14 @@ export async function moveRecipeToSlot(
 
   const mealTypeResult = mealTypeSchema.safeParse(targetMealType);
   if (!mealTypeResult.success) return { error: "Invalid meal type" };
-  const validMealType = mealTypeResult.data;
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(targetDate)) {
     return { error: "Invalid date format" };
   }
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "Not authenticated" };
+  const auth = await requireAuth();
+  if (auth.error) return { error: auth.error };
+  const { supabase, user } = auth;
 
   // Delete the old meal plan entry — filter by user_id to prevent cross-user deletion
   await supabase
@@ -395,40 +414,14 @@ export async function moveRecipeToSlot(
     .eq("id", idResult.data)
     .eq("user_id", user.id);
 
-  // Upsert into the target slot
-  const { error: upsertError } = await supabase
-    .from("meal_plans")
-    .upsert(
-      {
-        user_id: user.id,
-        recipe_id: recipeIdResult.data,
-        date: targetDate,
-        meal_type: validMealType,
-      },
-      { onConflict: "user_id,date,meal_type" }
-    );
-
-  if (upsertError) {
-    // Fallback: delete + insert
-    await supabase
-      .from("meal_plans")
-      .delete()
-      .eq("user_id", user.id)
-      .eq("date", targetDate)
-      .eq("meal_type", validMealType);
-
-    const { error } = await supabase.from("meal_plans").insert({
-      user_id: user.id,
-      recipe_id: recipeIdResult.data,
-      date: targetDate,
-      meal_type: validMealType,
-    });
-
-    if (error) {
-      console.error("moveRecipeToSlot DB error:", error);
-      return { error: "Failed to move recipe. Please try again." };
-    }
-  }
+  const result = await upsertMealPlanSlot(
+    supabase,
+    user.id,
+    recipeIdResult.data,
+    targetDate,
+    mealTypeResult.data
+  );
+  if (result.error) return { error: result.error };
 
   revalidatePath("/");
   return { success: true };
@@ -474,10 +467,11 @@ export async function generateGroceryList(weekStart: string) {
   sunday.setDate(monday.getDate() + 6);
   const sundayStr = `${sunday.getFullYear()}-${String(sunday.getMonth() + 1).padStart(2, "0")}-${String(sunday.getDate()).padStart(2, "0")}`;
 
-  // Fetch all meal plans for this user's week with recipe data
+  // Fetch all meal plans for this user's week with the recipe fields the
+  // aggregator actually needs (id + ingredients), not the full recipe row.
   const { data: mealPlans, error: fetchError } = await supabase
     .from("meal_plans")
-    .select("*, recipes(*)")
+    .select("*, recipes(id, ingredients)")
     .eq("user_id", user.id)
     .gte("date", weekStart)
     .lte("date", sundayStr)
@@ -492,35 +486,20 @@ export async function generateGroceryList(weekStart: string) {
     return { error: "No meals planned for this week. Add recipes to your calendar first." };
   }
 
-  // Flatten every planned recipe's ingredients into raw rows, then consolidate
-  // (see consolidateIngredients for the name/unit matching + summing rules).
-  const rawIngredients: RawGroceryIngredient[] = [];
-  for (const plan of mealPlans) {
-    // Safely extract recipe data — Supabase joins return the related row as an object
-    const recipe = plan.recipes as Record<string, unknown> | null;
-    if (!recipe) continue;
+  // Aggregate ingredients across all planned recipes (pure, tested separately).
+  const aggregatedItems = aggregateMealPlanIngredients(
+    mealPlans as MealPlanWithRecipe[]
+  );
 
-    const recipeId = typeof recipe.id === "string" ? recipe.id : null;
-    const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : [];
-    if (!recipeId || ingredients.length === 0) continue;
-
-    for (const raw of ingredients) {
-      const ing = typeof raw === "object" && raw !== null ? (raw as Record<string, unknown>) : null;
-      if (!ing) continue;
-
-      const name = typeof ing.name === "string" ? ing.name : "";
-      if (!name.trim()) continue;
-
-      rawIngredients.push({
-        name,
-        unit: typeof ing.unit === "string" ? ing.unit : "",
-        quantity: typeof ing.quantity === "string" ? ing.quantity : String(ing.quantity ?? ""),
-        recipeId,
-      });
-    }
-  }
-
-  const consolidated = consolidateIngredients(rawIngredients);
+  // Pantry staples the user always has — flag matching items so they show in a
+  // collapsed "you likely have these" section instead of the buy list.
+  const { data: pantryRows } = await supabase
+    .from("pantry_items")
+    .select("name")
+    .eq("user_id", user.id);
+  const pantrySet = new Set(
+    (pantryRows ?? []).map((p) => p.name.toLowerCase().trim())
+  );
 
   // Delete existing grocery list for this week (if regenerating) — filter by user_id
   const { data: existingList } = await supabase
@@ -547,16 +526,17 @@ export async function generateGroceryList(weekStart: string) {
     return { error: "Failed to create grocery list. Please try again." };
   }
 
-  // Insert aggregated items
-  const items = consolidated.map((item) => ({
+  // Insert aggregated items, flagging pantry staples.
+  const items = aggregatedItems.map((item) => ({
     list_id: newList.id,
     name: item.name,
     quantity: item.quantity,
     unit: item.unit,
-    category: categorizeIngredient(item.name),
+    category: item.category,
     checked: false,
-    recipe_ids: item.recipeIds,
+    recipe_ids: item.recipe_ids,
     is_manual: false,
+    is_pantry: pantrySet.has(item.name.toLowerCase().trim()),
   }));
 
   if (items.length > 0) {
@@ -640,16 +620,20 @@ export async function addManualGroceryItem(
     return { error: "Grocery list not found" };
   }
 
-  const { error } = await supabase.from("grocery_items").insert({
-    list_id: listIdResult.data,
-    name: trimmedName,
-    quantity: 1,
-    unit: null,
-    category: category || categorizeIngredient(name),
-    checked: false,
-    recipe_ids: [],
-    is_manual: true,
-  });
+  const { data: inserted, error } = await supabase
+    .from("grocery_items")
+    .insert({
+      list_id: listIdResult.data,
+      name: trimmedName,
+      quantity: 1,
+      unit: null,
+      category: category || categorizeIngredient(name),
+      checked: false,
+      recipe_ids: [],
+      is_manual: true,
+    })
+    .select("*")
+    .single();
 
   if (error) {
     console.error("addManualGroceryItem DB error:", error);
@@ -657,7 +641,9 @@ export async function addManualGroceryItem(
   }
 
   revalidatePath("/grocery");
-  return { success: true };
+  // Return the inserted row so the client can swap its optimistic temp-id item
+  // for the real UUID + computed category (so toggle/remove target a real row).
+  return { success: true, item: inserted as GroceryItem };
 }
 
 export async function removeGroceryItem(itemId: string) {
@@ -694,4 +680,163 @@ export async function removeGroceryItem(itemId: string) {
 
   revalidatePath("/grocery");
   return { success: true };
+}
+
+// ============================================
+// PANTRY ACTIONS
+// ============================================
+
+export async function addPantryItem(name: string) {
+  const trimmed = name?.trim();
+  if (!trimmed) return { error: "Item name is required" };
+  if (trimmed.length > 100) return { error: "Item name is too long" };
+
+  const auth = await requireAuth();
+  if (auth.error) return { error: auth.error };
+  const { supabase, user } = auth;
+
+  // Store normalized (lowercase) so matching against grocery items is reliable;
+  // ignore duplicates via the unique (user_id, name) constraint.
+  const { data: inserted, error } = await supabase
+    .from("pantry_items")
+    .upsert(
+      { user_id: user.id, name: trimmed.toLowerCase() },
+      { onConflict: "user_id,name", ignoreDuplicates: true }
+    )
+    .select("id, name, created_at")
+    .maybeSingle();
+
+  if (error) {
+    console.error("addPantryItem DB error:", error);
+    return { error: "Failed to add staple. Please try again." };
+  }
+
+  revalidatePath("/pantry");
+  revalidatePath("/grocery");
+  return { success: true, item: inserted as PantryItem | null };
+}
+
+export async function removePantryItem(itemId: string) {
+  const idResult = uuidSchema.safeParse(itemId);
+  if (!idResult.success) return { error: "Invalid item ID" };
+
+  const auth = await requireAuth();
+  if (auth.error) return { error: auth.error };
+  const { supabase, user } = auth;
+
+  const { error } = await supabase
+    .from("pantry_items")
+    .delete()
+    .eq("id", idResult.data)
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("removePantryItem DB error:", error);
+    return { error: "Failed to remove staple. Please try again." };
+  }
+
+  revalidatePath("/pantry");
+  revalidatePath("/grocery");
+  return { success: true };
+}
+
+// ============================================
+// AI WEEK PLANNER
+// ============================================
+
+/**
+ * Fill the week's EMPTY dinner slots with distinct recipes chosen by Claude from
+ * the user's own library. Never overwrites an already-planned dinner, and only
+ * assigns recipes the user actually owns.
+ */
+export async function planMyWeek(weekStart: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(weekStart)) {
+    return { error: "Invalid week" };
+  }
+
+  const auth = await requireAuth();
+  if (auth.error) return { error: auth.error };
+  const { supabase, user } = auth;
+
+  if (!isAiAvailable()) {
+    return { error: "AI planning needs an Anthropic API key to be configured." };
+  }
+  const client = getAnthropicClient();
+  if (!client) return { error: "AI planning is currently unavailable." };
+
+  // Library
+  const { data: recipeRows } = await supabase
+    .from("recipes")
+    .select("id, title, tags, is_favorite")
+    .eq("user_id", user.id);
+  const library = recipeRows ?? [];
+  if (library.length === 0) {
+    return { error: "Add some recipes first, then I can plan your week." };
+  }
+
+  // Which dinner days are still empty?
+  const monday = new Date(weekStart + "T00:00:00");
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const sundayStr = `${sunday.getFullYear()}-${String(sunday.getMonth() + 1).padStart(2, "0")}-${String(sunday.getDate()).padStart(2, "0")}`;
+
+  const { data: existing } = await supabase
+    .from("meal_plans")
+    .select("date")
+    .eq("user_id", user.id)
+    .eq("meal_type", "dinner")
+    .gte("date", weekStart)
+    .lte("date", sundayStr);
+  const filled = new Set((existing ?? []).map((e) => e.date));
+
+  const dayDates: string[] = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  });
+  const emptyDayIndices = dayDates
+    .map((date, i) => ({ date, i }))
+    .filter((x) => !filled.has(x.date));
+
+  if (emptyDayIndices.length === 0) {
+    return { error: "Every dinner this week is already planned." };
+  }
+
+  const planRecipes: PlanRecipe[] = library.map((r) => ({
+    id: r.id,
+    title: r.title,
+    tags: Array.isArray(r.tags) ? r.tags : [],
+    favorite: !!r.is_favorite,
+  }));
+
+  const entries = await generateWeekPlan(
+    client,
+    planRecipes,
+    emptyDayIndices.map((x) => x.i)
+  );
+  if (!entries || entries.length === 0) {
+    return { error: "Couldn't generate a plan. Please try again." };
+  }
+
+  // Assign — only into empty days, and only recipes the user owns.
+  const ownedIds = new Set(library.map((r) => r.id));
+  let assigned = 0;
+  for (const entry of entries) {
+    const slot = emptyDayIndices.find((x) => x.i === entry.dayIndex);
+    if (!slot || !ownedIds.has(entry.recipeId)) continue;
+    const res = await upsertMealPlanSlot(
+      supabase,
+      user.id,
+      entry.recipeId,
+      slot.date,
+      "dinner"
+    );
+    if (!res.error) assigned++;
+  }
+
+  revalidatePath("/");
+  if (assigned === 0) {
+    return { error: "Couldn't assign any meals. Please try again." };
+  }
+  return { success: true, assigned };
 }

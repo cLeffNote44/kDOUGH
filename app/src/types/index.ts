@@ -47,5 +47,12 @@ export interface GroceryItem {
   checked: boolean;
   recipe_ids: string[];
   is_manual: boolean;
+  is_pantry: boolean;
+  created_at: string;
+}
+
+export interface PantryItem {
+  id: string;
+  name: string;
   created_at: string;
 }

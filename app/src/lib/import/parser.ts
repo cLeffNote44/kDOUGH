@@ -42,8 +42,10 @@ const UNITS = new Set([
   "handful",
 ]);
 
-// Match quantities like: 2, 1/2, 1 1/2, ½, 2.5, ¼
-const QUANTITY_PATTERN = /^([\d]+[\s][\d]+\/[\d]+|[\d]+\/[\d]+|[\d]+\.[\d]+|[\d]+|[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])/;
+// Match quantities like: 2, 1/2, 1 1/2, ½, 2.5, ¼, and ranges like 2-3 / 2–3.
+// The range alternative is first so "2-3" is captured whole (parseQuantity then
+// resolves it to its lower bound) instead of leaving "-3" stranded in the name.
+const QUANTITY_PATTERN = /^([\d]+\s*[-–]\s*[\d]+|[\d]+[\s][\d]+\/[\d]+|[\d]+\/[\d]+|[\d]+\.[\d]+|[\d]+|[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])/;
 
 // Unicode fraction map
 const FRACTION_MAP: Record<string, string> = {
@@ -64,9 +66,13 @@ const FRACTION_MAP: Record<string, string> = {
   "⅞": "7/8",
 };
 
+// Precomputed once at module load — the keys are single non-metacharacter
+// glyphs, so a literal replaceAll avoids compiling a RegExp per call per line.
+const FRACTION_ENTRIES = Object.entries(FRACTION_MAP);
+
 function normalizeFractions(text: string): string {
-  for (const [unicode, ascii] of Object.entries(FRACTION_MAP)) {
-    text = text.replace(new RegExp(unicode, "g"), ascii);
+  for (const [unicode, ascii] of FRACTION_ENTRIES) {
+    text = text.replaceAll(unicode, ascii);
   }
   return text;
 }
@@ -232,9 +238,14 @@ export function normalizeUnit(unit: string): string {
 
 /**
  * Parse a quantity string (e.g., "2", "1/2", "1 1/2") into a number.
+ *
+ * Returns `null` for an absent or unparseable quantity ("", "a pinch",
+ * "to taste") so callers can distinguish "no measurable amount" from a real
+ * count of 1 — this prevents grocery aggregation from fabricating quantities
+ * like "2 salt" when multiple recipes each call for unmeasured salt.
  */
-export function parseQuantity(q: string): number {
-  if (!q || q.trim() === "") return 1;
+export function parseQuantity(q: string): number | null {
+  if (!q || q.trim() === "") return null;
   const trimmed = q.trim();
 
   // Mixed number: "1 1/2"
@@ -249,9 +260,10 @@ export function parseQuantity(q: string): number {
     return parseInt(fracMatch[1]) / parseInt(fracMatch[2]);
   }
 
-  // Decimal or whole number
+  // Decimal or whole number (parseFloat also resolves a range like "2-3" to its
+  // lower bound, which is the intended behavior).
   const num = parseFloat(trimmed);
-  return isNaN(num) ? 1 : num;
+  return isNaN(num) ? null : num;
 }
 
 /**
@@ -278,6 +290,13 @@ export function formatQuantity(n: number): string {
 
   return n.toFixed(1).replace(/\.0$/, "");
 }
+
+// Keys sorted longest-first so a compound name matches its specific entry
+// ("black pepper" -> spices, "chicken broth" -> pantry) before a shorter
+// generic substring ("pepper" -> produce, "chicken" -> meat). Computed once.
+const CATEGORY_KEYS_BY_LENGTH = Object.keys(CATEGORY_MAP).sort(
+  (a, b) => b.length - a.length
+);
 
 // ============================================
 // GROCERY CONSOLIDATION (used by grocery list generation)
@@ -407,9 +426,9 @@ export function categorizeIngredient(name: string): string {
   // Direct match
   if (CATEGORY_MAP[lower]) return CATEGORY_MAP[lower];
 
-  // Partial match — check if any key is contained in the name
-  for (const [key, category] of Object.entries(CATEGORY_MAP)) {
-    if (lower.includes(key)) return category;
+  // Partial match — prefer the longest key contained in the name.
+  for (const key of CATEGORY_KEYS_BY_LENGTH) {
+    if (lower.includes(key)) return CATEGORY_MAP[key];
   }
 
   return "other";

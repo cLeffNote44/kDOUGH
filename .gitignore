@@ -19,3 +19,10 @@ Thumbs.db
 
 # ── Node (catch-all for root-level) ──────────
 node_modules/
+
+# ── Build / test artifacts (safety net; app/.gitignore covers app/) ──
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo

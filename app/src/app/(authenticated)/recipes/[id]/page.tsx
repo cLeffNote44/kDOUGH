@@ -32,7 +32,9 @@ export default async function RecipeDetailPage({
     notFound();
   }
 
-  const r = recipe as Recipe;
+  // Boundary cast: the DB row types ingredients as Json, but the app guarantees
+  // the Ingredient[] shape (Zod on write + the recipes_ingredients_is_array CHECK).
+  const r = recipe as unknown as Recipe;
   const totalTime =
     (r.prep_time ?? 0) + (r.cook_time ?? 0) > 0
       ? `${(r.prep_time ?? 0) + (r.cook_time ?? 0)} min total`

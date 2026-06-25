@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useFocusTrap } from "@/components/useFocusTrap";
 
 const SHORTCUTS = [
   { key: "W", description: "Go to This Week" },
@@ -25,14 +26,20 @@ export default function ShortcutHelpModal({ onClose }: { onClose: () => void }) 
     return () => document.removeEventListener("mousedown", handleClick);
   }, [onClose]);
 
+  // Focus trap + Escape-to-close (previously missing) + focus restore.
+  useFocusTrap(modalRef, onClose);
+
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[60]">
       <div
         ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="shortcut-help-title"
         className="glass-strong rounded-xl shadow-lg w-full max-w-xs mx-4 border border-stone-200/60 dark:border-stone-700/40"
       >
         <div className="p-4 border-b border-stone-200/60 dark:border-stone-700/40 flex items-center justify-between">
-          <h2 className="font-display font-semibold text-stone-900 dark:text-stone-100 text-sm">
+          <h2 id="shortcut-help-title" className="font-display font-semibold text-stone-900 dark:text-stone-100 text-sm">
             Keyboard Shortcuts
           </h2>
           <button

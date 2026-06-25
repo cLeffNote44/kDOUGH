@@ -1,5 +1,8 @@
 # kDOUGH — Meal Planner
 
+[![CI](https://github.com/cLeffNote44/kDOUGH/actions/workflows/ci.yml/badge.svg)](https://github.com/cLeffNote44/kDOUGH/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 An open-source meal planning and grocery list app. Plan your week, import recipes from any URL, and generate an organized grocery list in one tap.
 
 ## Screenshots
@@ -125,7 +128,10 @@ All scripts run from the `app/` directory.
 | `npm run lint`              | Run ESLint                                   |
 | `npm run electron:dev`      | Run app in Electron (dev mode)               |
 | `npm run electron:build`    | Build `.dmg` for macOS (arm64 + x64)         |
+| `npm run electron:build:all`| Build macOS + Windows (nsis) + Linux (AppImage) |
 | `npm run electron:build:dir`| Build unpacked app (for testing)             |
+| `npm run typecheck`         | Type-check with `tsc --noEmit`               |
+| `npm test` / `npm run test:coverage` | Run unit/component tests (+ coverage) |
 
 ### Building the `.dmg`
 
@@ -139,7 +145,14 @@ npm run electron:build
 
 The `.dmg` file will be in `app/dist/`. Double-click to mount and drag to Applications.
 
-**Note:** The Electron build bundles the Next.js standalone output. `NEXT_PUBLIC_*` environment variables are baked in at build time. The `ANTHROPIC_API_KEY` (if used) must be present in `.env.local` before building.
+**Note:** The Electron build bundles the Next.js standalone output. `NEXT_PUBLIC_*` variables are inlined at build time, so Supabase works in the packaged app. `ANTHROPIC_API_KEY` is a **runtime** var and is _not_ inlined — to enable AI import in the shipped app, either set it in the launch environment or add it to a user config file the app reads at startup:
+
+```jsonc
+// macOS: ~/Library/Application Support/kDOUGH/config.json
+{ "ANTHROPIC_API_KEY": "sk-ant-..." }
+```
+
+Code signing / notarization are not configured, so distributing to other machines requires an Apple Developer ID (macOS) or signing certs (Windows); see the Gatekeeper note below.
 
 ### Supabase Auth Setup
 

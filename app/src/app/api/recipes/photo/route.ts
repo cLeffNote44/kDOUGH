@@ -94,8 +94,13 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ recipe });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to process photo";
-    return NextResponse.json({ error: message }, { status: 500 });
+    // Log the real error server-side; return a generic message so internal
+    // library/network details aren't leaked to the client (matches the import
+    // route and server actions).
+    console.error("Photo OCR error:", error);
+    return NextResponse.json(
+      { error: "Failed to process photo. Please try again." },
+      { status: 500 }
+    );
   }
 }

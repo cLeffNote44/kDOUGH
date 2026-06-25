@@ -19,8 +19,8 @@ const outfit = Outfit({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // Pinch-to-zoom left enabled (no maximumScale / userScalable:false) so
+  // low-vision users can zoom — WCAG 1.4.4.
   viewportFit: "cover",
 };
 
