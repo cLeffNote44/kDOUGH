@@ -39,3 +39,64 @@ jobs:
 
     - name: Build
       run: cd app && npm run build
+
+  # Logged-out e2e flows: login renders + protected-route redirect, run through
+  # the real Next server. No Supabase data/auth dependency, so this GATES merges.
+  e2e-unauth:
+    needs: test
+    runs-on: ubuntu-latest
+    env:
+      E2E_BASE_URL: http://localhost:3000
+      # Placeholder fallbacks so this gating job boots (and stays green) even with
+      # no secrets set. The unauth flows never touch a real Supabase: /login is
+      # client-rendered, and the protected-route redirect relies on getUser()
+      # short-circuiting to a null user when there is no session cookie.
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/setup-node@v6
+      with:
+        node-version: 20
+        cache: 'npm'
+        cache-dependency-path: app/package-lock.json
+    - run: cd app && npm ci
+    # GitHub-hosted runners don't ship Playwright browsers — install Chromium.
+    - run: cd app && npx playwright install --with-deps chromium
+    - run: cd app && npm run build
+    - name: Run unauthenticated e2e
+      run: cd app && npx playwright test --project=chromium-unauth
+
+  # Authenticated smoke flow against a live Supabase project + seeded user.
+  # NON-GATING (continue-on-error) and push-only (no secrets on fork PRs), so a
+  # fragile network/auth flow never blocks a merge.
+  e2e-authed:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    continue-on-error: true
+    env:
+      E2E_BASE_URL: http://localhost:3000
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+      E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/setup-node@v6
+      with:
+        node-version: 20
+        cache: 'npm'
+        cache-dependency-path: app/package-lock.json
+    - run: cd app && npm ci
+    - run: cd app && npx playwright install --with-deps chromium
+    - run: cd app && npm run build
+    - name: Run authed smoke (setup + authed projects)
+      run: cd app && npx playwright test --project=setup --project=chromium-authed
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report
+        path: app/test-results
+        retention-days: 7
