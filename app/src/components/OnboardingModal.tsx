@@ -116,8 +116,11 @@ export default function OnboardingModal() {
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Check localStorage for persistence across sessions (already implemented)
+    // Check localStorage for persistence across sessions. localStorage is
+    // client-only, so showing the modal must happen post-hydration, not during
+    // render — the setState-in-effect here is intentional.
     const onboarded = localStorage.getItem("kd-onboarded");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!onboarded) setShow(true);
   }, []);
 

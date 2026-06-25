@@ -151,6 +151,10 @@ export default function SwipeableItem({
         className="relative bg-white dark:bg-stone-900"
         style={{
           transform: `translateX(${offsetX}px)`,
+          // Intentional ref read: disables the transform transition during an
+          // active swipe (so the card tracks the finger 1:1), then animates the
+          // spring-back. offsetX setState re-renders alongside isSwiping changes.
+          // eslint-disable-next-line react-hooks/refs
           transition: isSwiping.current ? "none" : "transform 0.2s ease-out",
           willChange: offsetX !== 0 ? "transform" : "auto",
         }}

@@ -33,7 +33,10 @@ export default function ThemeProvider({
     const clientTheme = stored || (prefersDark ? "dark" : "light");
 
     if (clientTheme !== initialTheme) {
-      // Client preference differs from cookie — update to match
+      // Client preference differs from the SSR cookie — reconcile once after
+      // hydration. localStorage/matchMedia are client-only, so this can't be a
+      // render-time initializer; the post-hydration setState is intentional.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme(clientTheme);
       setThemeCookie(clientTheme);
       document.documentElement.classList.toggle("dark", clientTheme === "dark");

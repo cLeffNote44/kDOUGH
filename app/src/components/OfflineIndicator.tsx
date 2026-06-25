@@ -1,24 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
+
+function subscribe(callback: () => void) {
+  window.addEventListener("online", callback);
+  window.addEventListener("offline", callback);
+  return () => {
+    window.removeEventListener("online", callback);
+    window.removeEventListener("offline", callback);
+  };
+}
 
 export default function OfflineIndicator() {
-  const [isOffline, setIsOffline] = useState(false);
-
-  useEffect(() => {
-    const goOffline = () => setIsOffline(true);
-    const goOnline = () => setIsOffline(false);
-
-    // Check initial state
-    setIsOffline(!navigator.onLine);
-
-    window.addEventListener("offline", goOffline);
-    window.addEventListener("online", goOnline);
-    return () => {
-      window.removeEventListener("offline", goOffline);
-      window.removeEventListener("online", goOnline);
-    };
-  }, []);
+  // useSyncExternalStore is the idiomatic way to read a client-only external
+  // value (navigator.onLine) without a setState-in-effect. The server snapshot
+  // assumes online so the banner never renders during SSR.
+  const isOffline = useSyncExternalStore(
+    subscribe,
+    () => !navigator.onLine,
+    () => false
+  );
 
   if (!isOffline) return null;
 
