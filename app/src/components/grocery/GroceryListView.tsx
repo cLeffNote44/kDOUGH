@@ -217,6 +217,69 @@ export default function GroceryListView({
     setOptimisticItems((prev) => prev.filter((i) => i.id !== tempId));
   };
 
+  // ── Export / share ────────────────────────────
+  const escapeHtml = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  // Build a category-grouped plaintext + printable HTML of what still needs buying.
+  const buildShare = (): { text: string; html: string } => {
+    const byCat = groupItems(unchecked, "category", recipeMap);
+    const textLines: string[] = ["Grocery List", ""];
+    const htmlParts: string[] = ["<h1>Grocery List</h1>"];
+    for (const g of byCat) {
+      textLines.push(g.label.toUpperCase());
+      htmlParts.push(`<h2>${escapeHtml(g.label)}</h2><ul>`);
+      for (const it of g.items) {
+        const line = formatItemDisplay(it);
+        textLines.push(`- ${line}`);
+        htmlParts.push(`<li>&#9744; ${escapeHtml(line)}</li>`);
+      }
+      htmlParts.push("</ul>");
+      textLines.push("");
+    }
+    return { text: textLines.join("\n").trim(), html: htmlParts.join("") };
+  };
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(buildShare().text);
+      toast.success("List copied to clipboard");
+    } catch {
+      toast.error("Couldn't copy the list");
+    }
+  };
+
+  const handleShare = async () => {
+    const { text } = buildShare();
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({ title: "Grocery List", text });
+      } catch {
+        // User cancelled or share failed — no-op.
+      }
+    } else {
+      await handleCopy();
+    }
+  };
+
+  const handlePrint = () => {
+    const { html } = buildShare();
+    const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Grocery List</title><style>body{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;padding:24px;color:#1c1917}h1{font-size:18px;margin:0 0 8px}h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#78716c;margin:16px 0 4px;border-bottom:1px solid #e7e5e4;padding-bottom:2px}ul{list-style:none;padding:0;margin:0}li{padding:3px 0;font-size:14px}</style></head><body>${html}</body></html>`;
+    // Print via a hidden iframe — works in the browser and the Electron build
+    // (where window.open is denied).
+    const iframe = document.createElement("iframe");
+    iframe.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;";
+    document.body.appendChild(iframe);
+    const idoc = iframe.contentWindow?.document;
+    if (!idoc) return;
+    idoc.open();
+    idoc.write(doc);
+    idoc.close();
+    iframe.contentWindow?.focus();
+    iframe.contentWindow?.print();
+    setTimeout(() => document.body.removeChild(iframe), 1000);
+  };
+
   const totalItems = mainItems.length;
   const checkedCount = checked.length;
 
@@ -241,6 +304,30 @@ export default function GroceryListView({
               }}
             />
           </div>
+        </div>
+      )}
+
+      {/* Export / share toolbar */}
+      {unchecked.length > 0 && (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCopy}
+            className="px-3 py-1.5 text-xs font-medium rounded-lg glass border border-stone-200/60 dark:border-stone-700/40 text-stone-600 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+          >
+            Copy
+          </button>
+          <button
+            onClick={handlePrint}
+            className="px-3 py-1.5 text-xs font-medium rounded-lg glass border border-stone-200/60 dark:border-stone-700/40 text-stone-600 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+          >
+            Print
+          </button>
+          <button
+            onClick={handleShare}
+            className="px-3 py-1.5 text-xs font-medium rounded-lg glass border border-stone-200/60 dark:border-stone-700/40 text-stone-600 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+          >
+            Share
+          </button>
         </div>
       )}
 

@@ -75,4 +75,33 @@ describe("GroceryListView", () => {
     );
     expect(screen.getByText("1 of 2 items")).toBeInTheDocument();
   });
+
+  it("hides pantry staples in a collapsed section (out of the buy list)", () => {
+    render(
+      <GroceryListView
+        listId="l1"
+        items={[
+          item({ id: "a", name: "Chicken", category: "meat" }),
+          item({ id: "b", name: "Salt", is_pantry: true }),
+        ]}
+      />
+    );
+    expect(screen.getByText(/you likely have these/i)).toBeInTheDocument();
+    // Pantry item is excluded from the progress count.
+    expect(screen.getByText("0 of 1 items")).toBeInTheDocument();
+  });
+
+  it("copies the list as text", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+    render(
+      <GroceryListView
+        listId="l1"
+        items={[item({ id: "a", name: "Flour", category: "pantry" })]}
+      />
+    );
+    fireEvent.click(screen.getByText("Copy"));
+    await waitFor(() => expect(writeText).toHaveBeenCalled());
+    expect(writeText.mock.calls[0][0]).toContain("Flour");
+  });
 });
