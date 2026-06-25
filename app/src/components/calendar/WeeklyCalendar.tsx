@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { removeRecipeFromDay, moveRecipeToSlot } from "@/lib/actions";
@@ -46,22 +46,26 @@ export default function WeeklyCalendar({ mealPlans, weekStart, isCurrentWeek }: 
   const confirmDialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(confirmDialogRef, () => setConfirmRemove(null), !!confirmRemove);
 
-  // Build planMap: date → meal_type → plan
-  const planMap = new Map<string, Map<string, MealPlan>>();
-  for (const plan of mealPlans) {
-    if (!planMap.has(plan.date)) {
-      planMap.set(plan.date, new Map());
+  // Build planMap: date → meal_type → plan (memoized — rebuilt only when the
+  // week's meal plans change, not on every hover/drag/expand state change).
+  const planMap = useMemo(() => {
+    const m = new Map<string, Map<string, MealPlan>>();
+    for (const plan of mealPlans) {
+      if (!m.has(plan.date)) m.set(plan.date, new Map());
+      m.get(plan.date)!.set(plan.meal_type, plan);
     }
-    planMap.get(plan.date)!.set(plan.meal_type, plan);
-  }
+    return m;
+  }, [mealPlans]);
 
-  // Generate 7 dates
-  const startDate = new Date(weekStart + "T00:00:00");
-  const dates = DAYS.map((_, i) => {
-    const d = new Date(startDate);
-    d.setDate(startDate.getDate() + i);
-    return toDateString(d);
-  });
+  // Generate 7 dates for the week (memoized on weekStart).
+  const dates = useMemo(() => {
+    const startDate = new Date(weekStart + "T00:00:00");
+    return DAYS.map((_, i) => {
+      const d = new Date(startDate);
+      d.setDate(startDate.getDate() + i);
+      return toDateString(d);
+    });
+  }, [weekStart]);
 
   const today = toDateString(new Date());
 

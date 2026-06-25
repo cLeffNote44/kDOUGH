@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useMemo, useTransition } from "react";
 import { toast } from "sonner";
 import { toggleGroceryItem, removeGroceryItem } from "@/lib/actions";
 import type { GroceryItem } from "@/types";
@@ -156,8 +156,12 @@ export default function GroceryListView({
   const unchecked = optimisticItems.filter((i) => !i.checked);
   const checked = optimisticItems.filter((i) => i.checked);
 
-  // Group unchecked items based on sort mode
-  const groups = groupItems(unchecked, sortMode, recipeMap);
+  // Group unchecked items based on sort mode (memoized — groupItems sorts and
+  // builds Maps; the linear filter above is cheap and left as-is).
+  const groups = useMemo(
+    () => groupItems(optimisticItems.filter((i) => !i.checked), sortMode, recipeMap),
+    [optimisticItems, sortMode, recipeMap]
+  );
 
   const handleToggle = (itemId: string, currentChecked: boolean) => {
     const newChecked = !currentChecked;

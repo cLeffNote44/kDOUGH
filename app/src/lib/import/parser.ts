@@ -42,8 +42,10 @@ const UNITS = new Set([
   "handful",
 ]);
 
-// Match quantities like: 2, 1/2, 1 1/2, ½, 2.5, ¼
-const QUANTITY_PATTERN = /^([\d]+[\s][\d]+\/[\d]+|[\d]+\/[\d]+|[\d]+\.[\d]+|[\d]+|[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])/;
+// Match quantities like: 2, 1/2, 1 1/2, ½, 2.5, ¼, and ranges like 2-3 / 2–3.
+// The range alternative is first so "2-3" is captured whole (parseQuantity then
+// resolves it to its lower bound) instead of leaving "-3" stranded in the name.
+const QUANTITY_PATTERN = /^([\d]+\s*[-–]\s*[\d]+|[\d]+[\s][\d]+\/[\d]+|[\d]+\/[\d]+|[\d]+\.[\d]+|[\d]+|[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])/;
 
 // Unicode fraction map
 const FRACTION_MAP: Record<string, string> = {
@@ -64,9 +66,13 @@ const FRACTION_MAP: Record<string, string> = {
   "⅞": "7/8",
 };
 
+// Precomputed once at module load — the keys are single non-metacharacter
+// glyphs, so a literal replaceAll avoids compiling a RegExp per call per line.
+const FRACTION_ENTRIES = Object.entries(FRACTION_MAP);
+
 function normalizeFractions(text: string): string {
-  for (const [unicode, ascii] of Object.entries(FRACTION_MAP)) {
-    text = text.replace(new RegExp(unicode, "g"), ascii);
+  for (const [unicode, ascii] of FRACTION_ENTRIES) {
+    text = text.replaceAll(unicode, ascii);
   }
   return text;
 }

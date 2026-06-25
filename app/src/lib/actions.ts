@@ -301,6 +301,50 @@ export async function toggleFavorite(recipeId: string) {
 // MEAL PLAN ACTIONS
 // ============================================
 
+type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
+
+/**
+ * Upsert a recipe into a (user, date, meal_type) slot, replacing whatever is
+ * there. The per-user UNIQUE(user_id, date, meal_type) constraint makes the
+ * upsert atomic; the delete+insert fallback only fires on a DB missing that
+ * constraint (e.g. migration 20260624000002 not yet applied). Shared by
+ * assignRecipeToDay and moveRecipeToSlot.
+ */
+async function upsertMealPlanSlot(
+  supabase: SupabaseServerClient,
+  userId: string,
+  recipeId: string,
+  date: string,
+  mealType: string
+): Promise<{ error?: string }> {
+  const { error: upsertError } = await supabase
+    .from("meal_plans")
+    .upsert(
+      { user_id: userId, recipe_id: recipeId, date, meal_type: mealType },
+      { onConflict: "user_id,date,meal_type" }
+    );
+  if (!upsertError) return {};
+
+  await supabase
+    .from("meal_plans")
+    .delete()
+    .eq("user_id", userId)
+    .eq("date", date)
+    .eq("meal_type", mealType);
+
+  const { error } = await supabase.from("meal_plans").insert({
+    user_id: userId,
+    recipe_id: recipeId,
+    date,
+    meal_type: mealType,
+  });
+  if (error) {
+    console.error("upsertMealPlanSlot DB error:", error);
+    return { error: "Failed to save the meal. Please try again." };
+  }
+  return {};
+}
+
 export async function assignRecipeToDay(
   recipeId: string,
   date: string,
@@ -315,55 +359,24 @@ export async function assignRecipeToDay(
   if (!mealTypeResult.success) {
     return { error: "Invalid meal type" };
   }
-  const validMealType = mealTypeResult.data;
 
   // Validate date format (YYYY-MM-DD) and ensure it's a real date
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || isNaN(new Date(date + "T00:00:00").getTime())) {
     return { error: "Invalid date" };
   }
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return { error: "Not authenticated" };
-  }
+  const auth = await requireAuth();
+  if (auth.error) return { error: auth.error };
+  const { supabase, user } = auth;
 
-  // Atomic upsert: replace any existing plan for this date+meal_type slot.
-  // Requires a unique constraint on (user_id, date, meal_type) in Supabase.
-  // Fallback: delete-then-insert if no unique constraint exists.
-  const { error: upsertError } = await supabase
-    .from("meal_plans")
-    .upsert(
-      {
-        user_id: user.id,
-        recipe_id: recipeIdResult.data,
-        date,
-        meal_type: validMealType,
-      },
-      { onConflict: "user_id,date,meal_type" }
-    );
-
-  if (upsertError) {
-    // Fallback: unique constraint may not exist yet — use delete+insert
-    await supabase
-      .from("meal_plans")
-      .delete()
-      .eq("user_id", user.id)
-      .eq("date", date)
-      .eq("meal_type", validMealType);
-
-    const { error } = await supabase.from("meal_plans").insert({
-      user_id: user.id,
-      recipe_id: recipeIdResult.data,
-      date,
-      meal_type: validMealType,
-    });
-
-    if (error) {
-      console.error("assignRecipeToDay DB error:", error);
-      return { error: "Failed to assign recipe. Please try again." };
-    }
-  }
+  const result = await upsertMealPlanSlot(
+    supabase,
+    user.id,
+    recipeIdResult.data,
+    date,
+    mealTypeResult.data
+  );
+  if (result.error) return { error: result.error };
 
   revalidatePath("/");
   return { success: true };
@@ -383,15 +396,14 @@ export async function moveRecipeToSlot(
 
   const mealTypeResult = mealTypeSchema.safeParse(targetMealType);
   if (!mealTypeResult.success) return { error: "Invalid meal type" };
-  const validMealType = mealTypeResult.data;
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(targetDate)) {
     return { error: "Invalid date format" };
   }
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "Not authenticated" };
+  const auth = await requireAuth();
+  if (auth.error) return { error: auth.error };
+  const { supabase, user } = auth;
 
   // Delete the old meal plan entry — filter by user_id to prevent cross-user deletion
   await supabase
@@ -400,40 +412,14 @@ export async function moveRecipeToSlot(
     .eq("id", idResult.data)
     .eq("user_id", user.id);
 
-  // Upsert into the target slot
-  const { error: upsertError } = await supabase
-    .from("meal_plans")
-    .upsert(
-      {
-        user_id: user.id,
-        recipe_id: recipeIdResult.data,
-        date: targetDate,
-        meal_type: validMealType,
-      },
-      { onConflict: "user_id,date,meal_type" }
-    );
-
-  if (upsertError) {
-    // Fallback: delete + insert
-    await supabase
-      .from("meal_plans")
-      .delete()
-      .eq("user_id", user.id)
-      .eq("date", targetDate)
-      .eq("meal_type", validMealType);
-
-    const { error } = await supabase.from("meal_plans").insert({
-      user_id: user.id,
-      recipe_id: recipeIdResult.data,
-      date: targetDate,
-      meal_type: validMealType,
-    });
-
-    if (error) {
-      console.error("moveRecipeToSlot DB error:", error);
-      return { error: "Failed to move recipe. Please try again." };
-    }
-  }
+  const result = await upsertMealPlanSlot(
+    supabase,
+    user.id,
+    recipeIdResult.data,
+    targetDate,
+    mealTypeResult.data
+  );
+  if (result.error) return { error: result.error };
 
   revalidatePath("/");
   return { success: true };
@@ -479,10 +465,11 @@ export async function generateGroceryList(weekStart: string) {
   sunday.setDate(monday.getDate() + 6);
   const sundayStr = `${sunday.getFullYear()}-${String(sunday.getMonth() + 1).padStart(2, "0")}-${String(sunday.getDate()).padStart(2, "0")}`;
 
-  // Fetch all meal plans for this user's week with recipe data
+  // Fetch all meal plans for this user's week with the recipe fields the
+  // aggregator actually needs (id + ingredients), not the full recipe row.
   const { data: mealPlans, error: fetchError } = await supabase
     .from("meal_plans")
-    .select("*, recipes(*)")
+    .select("*, recipes(id, ingredients)")
     .eq("user_id", user.id)
     .gte("date", weekStart)
     .lte("date", sundayStr)
