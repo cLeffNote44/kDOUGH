@@ -79,10 +79,17 @@ export function parseAiRecipeJson(text: string): Record<string, unknown> | null 
   }
 }
 
+let cachedClient: Anthropic | null = null;
+let cachedKey: string | null = null;
+
 function getClient(): Anthropic | null {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return null;
-  return new Anthropic({ apiKey });
+  // Reuse the client across calls (it holds connection/config) unless the key changes.
+  if (cachedClient && cachedKey === apiKey) return cachedClient;
+  cachedClient = new Anthropic({ apiKey });
+  cachedKey = apiKey;
+  return cachedClient;
 }
 
 // Instructions live in the system prompt and are never mixed with untrusted
