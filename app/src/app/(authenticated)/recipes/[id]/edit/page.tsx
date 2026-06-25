@@ -39,7 +39,7 @@ export default async function EditRecipePage({
       <div className="flex items-center gap-3 mb-6">
         <Link
           href={`/recipes/${id}`}
-          className="text-stone-400 hover:text-stone-600 transition-colors"
+          className="text-slate-400 hover:text-slate-600 transition-colors"
         >
           &larr;
         </Link>

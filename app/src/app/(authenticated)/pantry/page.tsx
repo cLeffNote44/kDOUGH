@@ -23,10 +23,10 @@ export default async function PantryPage() {
   return (
     <div className="max-w-lg mx-auto">
       <div className="mb-6">
-        <h1 className="text-xl font-display font-semibold text-stone-900 dark:text-stone-100">
+        <h1 className="text-xl font-display font-semibold text-slate-900 dark:text-slate-100">
           Pantry Staples
         </h1>
-        <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
           Items you always have on hand. When you generate a grocery list, these
           are tucked into a &ldquo;you likely have these&rdquo; section instead of
           the buy list.

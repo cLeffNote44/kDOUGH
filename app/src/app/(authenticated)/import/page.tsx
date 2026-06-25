@@ -136,15 +136,15 @@ export default function ImportPage() {
       <div className="flex items-center gap-3 mb-6">
         <Link
           href="/recipes"
-          className="text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
+          className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
         >
           &larr;
         </Link>
-        <h1 className="text-xl font-display font-semibold text-stone-900 dark:text-stone-100">Import Recipe</h1>
+        <h1 className="text-xl font-display font-semibold text-slate-900 dark:text-slate-100">Import Recipe</h1>
       </div>
 
       {/* Tab switcher */}
-      <div className="flex gap-1 mb-6 bg-stone-100 dark:bg-stone-800 rounded-lg p-1">
+      <div className="flex gap-1 mb-6 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
         <button
           onClick={() => {
             setTab("url");
@@ -152,8 +152,8 @@ export default function ImportPage() {
           }}
           className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
             tab === "url"
-              ? "bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm"
-              : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300"
+              ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm"
+              : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
           }`}
         >
           From URL
@@ -165,8 +165,8 @@ export default function ImportPage() {
           }}
           className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
             tab === "photo"
-              ? "bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm"
-              : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300"
+              ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm"
+              : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
           }`}
         >
           From Photo
@@ -182,7 +182,7 @@ export default function ImportPage() {
             onChange={(e) => setUrl(e.target.value)}
             placeholder="Paste a recipe URL..."
             required
-            className="flex-1 px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white/80 dark:bg-stone-800/80 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+            className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
           />
           <button
             type="submit"
@@ -207,10 +207,10 @@ export default function ImportPage() {
           />
           <label
             htmlFor="photo-upload"
-            className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-stone-300 dark:border-stone-600 rounded-xl cursor-pointer hover:border-amber-400 dark:hover:border-amber-600 hover:bg-amber-50/50 dark:hover:bg-amber-900/10 transition-colors"
+            className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl cursor-pointer hover:border-teal-400 dark:hover:border-teal-600 hover:bg-teal-50/50 dark:hover:bg-teal-900/10 transition-colors"
           >
             <svg
-              className="w-10 h-10 text-stone-400 dark:text-stone-500 mb-3"
+              className="w-10 h-10 text-slate-400 dark:text-slate-500 mb-3"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -227,10 +227,10 @@ export default function ImportPage() {
                 d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"
               />
             </svg>
-            <span className="text-sm font-medium text-stone-600 dark:text-stone-400">
+            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
               Click to upload a photo
             </span>
-            <span className="text-xs text-stone-400 dark:text-stone-500 mt-1">
+            <span className="text-xs text-slate-400 dark:text-slate-500 mt-1">
               Recipe card, cookbook page, or screenshot
             </span>
           </label>
@@ -252,7 +252,7 @@ export default function ImportPage() {
 
       {/* Loading state */}
       {loading && (
-        <div className="glass rounded-xl border border-stone-200/60 dark:border-stone-700/40 p-8 text-center">
+        <div className="glass rounded-xl border border-slate-200/60 dark:border-slate-700/40 p-8 text-center">
           {photoPreviewUrl && (
             <img
               src={photoPreviewUrl}
@@ -262,7 +262,7 @@ export default function ImportPage() {
           )}
           <div className="flex items-center justify-center gap-2 mb-2">
             <svg
-              className="animate-spin h-4 w-4 text-amber-600 dark:text-amber-400"
+              className="animate-spin h-4 w-4 text-teal-600 dark:text-teal-400"
               viewBox="0 0 24 24"
               fill="none"
             >
@@ -280,13 +280,13 @@ export default function ImportPage() {
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               />
             </svg>
-            <p className="text-stone-500 dark:text-stone-400">
+            <p className="text-slate-500 dark:text-slate-400">
               {tab === "url"
                 ? "Fetching and parsing recipe..."
                 : "Reading recipe from photo..."}
             </p>
           </div>
-          <p className="text-sm text-stone-400 dark:text-stone-500">
+          <p className="text-sm text-slate-400 dark:text-slate-500">
             {tab === "photo"
               ? "Using AI to extract the recipe. This may take 10-15 seconds."
               : "This may take a few seconds."}
@@ -296,20 +296,20 @@ export default function ImportPage() {
 
       {/* Preview */}
       {preview && (
-        <div className="glass rounded-xl border border-stone-200/60 dark:border-stone-700/40 overflow-hidden">
+        <div className="glass rounded-xl border border-slate-200/60 dark:border-slate-700/40 overflow-hidden">
           {/* Header */}
-          <div className="p-4 border-b border-stone-100 dark:border-stone-800">
+          <div className="p-4 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-lg font-display font-semibold text-stone-900 dark:text-stone-100">
+                <h2 className="text-lg font-display font-semibold text-slate-900 dark:text-slate-100">
                   {preview.title}
                 </h2>
                 {preview.description && (
-                  <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                     {preview.description}
                   </p>
                 )}
-                <div className="flex gap-3 text-xs text-stone-400 dark:text-stone-500 mt-2">
+                <div className="flex gap-3 text-xs text-slate-400 dark:text-slate-500 mt-2">
                   {preview.servings && <span>{preview.servings} servings</span>}
                   {preview.prep_time && (
                     <span>{preview.prep_time} min prep</span>
@@ -331,18 +331,18 @@ export default function ImportPage() {
 
           {/* Ingredients */}
           {preview.ingredients.length > 0 && (
-            <div className="p-4 border-b border-stone-100 dark:border-stone-800">
-              <h3 className="text-xs font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide mb-2">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">
                 Ingredients ({preview.ingredients.length})
               </h3>
               <ul className="space-y-1">
                 {preview.ingredients.map((ing, i) => (
-                  <li key={i} className="text-sm text-stone-700 dark:text-stone-300">
+                  <li key={i} className="text-sm text-slate-700 dark:text-slate-300">
                     {ing.quantity && (
                       <span className="font-medium">{ing.quantity}</span>
                     )}{" "}
                     {ing.unit && (
-                      <span className="text-stone-500 dark:text-stone-400">{ing.unit}</span>
+                      <span className="text-slate-500 dark:text-slate-400">{ing.unit}</span>
                     )}{" "}
                     {ing.name}
                   </li>
@@ -353,11 +353,11 @@ export default function ImportPage() {
 
           {/* Instructions preview */}
           {preview.instructions && (
-            <div className="p-4 border-b border-stone-100 dark:border-stone-800">
-              <h3 className="text-xs font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide mb-2">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">
                 Instructions
               </h3>
-              <p className="text-sm text-stone-600 dark:text-stone-400 whitespace-pre-wrap line-clamp-6">
+              <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-wrap line-clamp-6">
                 {preview.instructions}
               </p>
             </div>
@@ -374,7 +374,7 @@ export default function ImportPage() {
             </button>
             <button
               onClick={resetState}
-              className="px-5 py-2 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 font-medium rounded-lg transition-colors"
+              className="px-5 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium rounded-lg transition-colors"
             >
               Discard
             </button>
@@ -385,14 +385,14 @@ export default function ImportPage() {
       {/* Help text */}
       {!loading && !preview && !error && (
         <div className="text-center py-8">
-          <p className="text-sm text-stone-400 dark:text-stone-500">
+          <p className="text-sm text-slate-400 dark:text-slate-500">
             {tab === "url"
               ? "Paste a URL from any recipe website. We'll extract the title, ingredients, and instructions automatically."
               : "Upload a photo of a recipe card, cookbook page, or screenshot. AI will read and extract the recipe for you."}
           </p>
-          <p className="text-xs text-stone-400 dark:text-stone-500 mt-2">
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
             If import fails, you can always{" "}
-            <Link href="/recipes/new" className="text-amber-600 dark:text-amber-400 underline">
+            <Link href="/recipes/new" className="text-teal-600 dark:text-teal-400 underline">
               add it manually
             </Link>
             .

@@ -9,7 +9,7 @@
 
 // Bumped to v3 so the activate handler purges older caches that may contain
 // user-specific HTML pages cached by the previous network-first-for-pages logic.
-const CACHE_NAME = "kdough-v3";
+const CACHE_NAME = "kdough-v5";
 // Only static, non-user-specific assets are precached. "/" is intentionally NOT
 // listed — it renders authenticated, user-specific HTML and must never be cached
 // (cross-user leakage on shared devices + staleness).
@@ -21,7 +21,7 @@ const STATIC_ASSETS = [
 ];
 
 // Minimal, data-free offline page shown when a navigation fails with no network.
-const OFFLINE_HTML = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Offline — kDOUGH</title><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:#fafaf9;color:#44403c;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;text-align:center;padding:24px}h1{color:#b45309;font-size:24px;margin:0 0 8px}p{color:#78716c;font-size:14px;max-width:320px}</style></head><body><h1>You're offline</h1><p>kDOUGH needs a connection to load your meals and grocery lists. Reconnect and try again.</p></body></html>`;
+const OFFLINE_HTML = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Offline — kDOUGH</title><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#334155;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;text-align:center;padding:24px}h1{color:#0f766e;font-size:24px;margin:0 0 8px}p{color:#64748b;font-size:14px;max-width:320px}</style></head><body><h1>You're offline</h1><p>kDOUGH needs a connection to load your meals and grocery lists. Reconnect and try again.</p></body></html>`;
 
 // Install: pre-cache static assets
 self.addEventListener("install", (event) => {

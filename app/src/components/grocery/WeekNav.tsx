@@ -32,25 +32,25 @@ export default function WeekNav({
     <div className="flex items-center justify-between mb-4">
       <button
         onClick={prevWeek}
-        className="px-3 py-1.5 text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors"
+        className="px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
       >
         &larr; Prev
       </button>
       {isCurrentWeek ? (
-        <span className="px-3 py-1.5 text-sm font-semibold text-amber-700 dark:text-amber-400">
+        <span className="px-3 py-1.5 text-sm font-semibold text-teal-700 dark:text-teal-400">
           This Week
         </span>
       ) : (
         <button
           onClick={goToThisWeek}
-          className="px-3 py-1.5 text-sm font-medium text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
+          className="px-3 py-1.5 text-sm font-medium text-teal-700 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-lg transition-colors"
         >
           Go to This Week
         </button>
       )}
       <button
         onClick={nextWeek}
-        className="px-3 py-1.5 text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors"
+        className="px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
       >
         Next &rarr;
       </button>

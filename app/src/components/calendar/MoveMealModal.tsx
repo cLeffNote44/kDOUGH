@@ -72,16 +72,16 @@ export default function MoveMealModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="move-meal-title"
-        className="glass-strong rounded-xl shadow-lg w-full max-w-md mx-4 max-h-[80vh] flex flex-col border border-stone-200/60 dark:border-stone-700/40"
+        className="glass-strong rounded-xl shadow-lg w-full max-w-md mx-4 max-h-[80vh] flex flex-col border border-slate-200/60 dark:border-slate-700/40"
       >
-        <div className="p-4 border-b border-stone-200/60 dark:border-stone-700/40 flex items-center justify-between">
-          <h2 id="move-meal-title" className="font-display font-semibold text-stone-900 dark:text-stone-100 text-sm">
-            Move <span className="text-amber-700 dark:text-amber-400">{recipeTitle}</span> to…
+        <div className="p-4 border-b border-slate-200/60 dark:border-slate-700/40 flex items-center justify-between">
+          <h2 id="move-meal-title" className="font-display font-semibold text-slate-900 dark:text-slate-100 text-sm">
+            Move <span className="text-teal-700 dark:text-teal-400">{recipeTitle}</span> to…
           </h2>
           <button
             onClick={onClose}
             aria-label="Cancel move"
-            className="text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 text-lg"
+            className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 text-lg"
           >
             &times;
           </button>
@@ -92,7 +92,7 @@ export default function MoveMealModal({
             const date = dates[i];
             return (
               <div key={date} className="flex items-center gap-2">
-                <span className="w-9 shrink-0 text-xs font-medium text-stone-500 dark:text-stone-400">
+                <span className="w-9 shrink-0 text-xs font-medium text-slate-500 dark:text-slate-400">
                   {dayLabel}
                 </span>
                 <div className="flex flex-wrap gap-1">
@@ -112,8 +112,8 @@ export default function MoveMealModal({
                         className={`px-2 py-1 text-[11px] font-medium rounded-md border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
                           isSource
                             ? `${mt.bg} ${mt.accent} border-current/20`
-                            : `border-stone-200 dark:border-stone-700 ${mt.accent} ${mt.hoverBg}`
-                        } ${isOccupied && !isSource ? "ring-1 ring-inset ring-stone-300 dark:ring-stone-600" : ""}`}
+                            : `border-slate-200 dark:border-slate-700 ${mt.accent} ${mt.hoverBg}`
+                        } ${isOccupied && !isSource ? "ring-1 ring-inset ring-slate-300 dark:ring-slate-600" : ""}`}
                       >
                         {isSource ? "Current" : mt.label}
                       </button>
@@ -125,8 +125,8 @@ export default function MoveMealModal({
           })}
         </div>
 
-        <div className="p-2.5 border-t border-stone-200/60 dark:border-stone-700/40 text-center">
-          <span className="text-[11px] text-stone-400 dark:text-stone-500">
+        <div className="p-2.5 border-t border-slate-200/60 dark:border-slate-700/40 text-center">
+          <span className="text-[11px] text-slate-400 dark:text-slate-500">
             Outlined slots already have a meal and will be replaced.
           </span>
         </div>

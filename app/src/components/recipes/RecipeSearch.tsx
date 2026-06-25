@@ -49,11 +49,11 @@ export default function RecipeSearch({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search recipes..."
-          className="flex-1 px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg text-sm bg-white/80 dark:bg-stone-800/80 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+          className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
         />
         <button
           type="submit"
-          className="px-4 py-2 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-sm font-medium rounded-lg transition-colors"
+          className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-lg transition-colors"
         >
           Search
         </button>
@@ -61,7 +61,7 @@ export default function RecipeSearch({
           <button
             type="button"
             onClick={handleClear}
-            className="px-3 py-2 text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 text-sm transition-colors"
+            className="px-3 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 text-sm transition-colors"
           >
             Clear
           </button>
@@ -77,8 +77,8 @@ export default function RecipeSearch({
               onClick={() => handleTagClick(tag)}
               className={`px-2.5 py-1 text-xs rounded-full transition-colors ${
                 tag === currentTag
-                  ? "bg-amber-200 dark:bg-amber-800/60 text-amber-800 dark:text-amber-200 font-medium"
-                  : "bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700"
+                  ? "bg-teal-200 dark:bg-teal-800/60 text-teal-800 dark:text-teal-200 font-medium"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
               }`}
             >
               {tag}

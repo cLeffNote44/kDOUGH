@@ -29,7 +29,7 @@ export default function ScalableIngredients({
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-semibold text-stone-800 dark:text-stone-200 uppercase tracking-wide">
+        <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200 uppercase tracking-wide">
           Ingredients
         </h2>
         {originalServings > 0 && (
@@ -37,18 +37,18 @@ export default function ScalableIngredients({
         )}
       </div>
       {servings !== originalServings && originalServings > 0 && (
-        <p className="text-xs text-amber-600 dark:text-amber-400 mb-2">
+        <p className="text-xs text-teal-600 dark:text-teal-400 mb-2">
           Scaled from {originalServings} to {servings} servings
         </p>
       )}
       <ul className="space-y-1.5">
         {scaled.map((ing, i) => (
-          <li key={`${ing.name}-${ing.quantity}-${i}`} className="text-stone-700 dark:text-stone-300">
+          <li key={`${ing.name}-${ing.quantity}-${i}`} className="text-slate-700 dark:text-slate-300">
             {ing.quantity && (
               <span className="font-medium">{ing.quantity}</span>
             )}{" "}
             {ing.unit && (
-              <span className="text-stone-500 dark:text-stone-400">{ing.unit}</span>
+              <span className="text-slate-500 dark:text-slate-400">{ing.unit}</span>
             )}{" "}
             {ing.name}
           </li>

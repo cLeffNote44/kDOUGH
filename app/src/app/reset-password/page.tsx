@@ -39,10 +39,10 @@ export default function ResetPasswordPage() {
   };
 
   const inputClasses =
-    "w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white/80 dark:bg-stone-800/80 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500";
+    "w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white/80 dark:bg-slate-800/80 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-stone-50 dark:bg-stone-950">
+    <div className="min-h-screen flex items-center justify-center bg-slate-300 dark:bg-slate-700">
       <div className="w-full max-w-sm mx-auto p-8">
         <div className="text-center mb-8">
           <img
@@ -50,8 +50,8 @@ export default function ResetPasswordPage() {
             alt="kDOUGH"
             className="w-20 h-20 mx-auto mb-3 rounded-2xl"
           />
-          <h1 className="text-2xl font-display font-semibold text-stone-900 dark:text-stone-100">kDOUGH</h1>
-          <p className="text-stone-500 dark:text-stone-400 mt-1">Set your new password</p>
+          <h1 className="text-2xl font-display font-semibold text-slate-900 dark:text-slate-100">kDOUGH</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Set your new password</p>
         </div>
 
         {success ? (
@@ -65,7 +65,7 @@ export default function ResetPasswordPage() {
                 router.push("/");
                 router.refresh();
               }}
-              className="mt-4 text-sm text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 font-medium"
+              className="mt-4 text-sm text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 font-medium"
             >
               Go to app
             </button>
@@ -75,7 +75,7 @@ export default function ResetPasswordPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
               >
                 New password
               </label>
@@ -94,7 +94,7 @@ export default function ResetPasswordPage() {
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
               >
                 Confirm password
               </label>

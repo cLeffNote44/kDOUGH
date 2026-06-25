@@ -22,12 +22,12 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-stone-50 dark:bg-stone-950 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-300 dark:bg-slate-700 px-4">
       <div className="text-center max-w-md">
         {/* Error illustration */}
         <div className="flex justify-center mb-5">
           <svg
-            className="w-16 h-16 text-amber-400 dark:text-amber-500"
+            className="w-16 h-16 text-teal-400 dark:text-teal-500"
             viewBox="0 0 64 64"
             fill="none"
             stroke="currentColor"
@@ -41,17 +41,17 @@ export default function GlobalError({
           </svg>
         </div>
 
-        <h2 className="text-lg font-display font-semibold text-stone-900 dark:text-stone-100 mb-2">
+        <h2 className="text-lg font-display font-semibold text-slate-900 dark:text-slate-100 mb-2">
           Something went wrong
         </h2>
-        <p className="text-sm text-stone-500 dark:text-stone-400 mb-6 leading-relaxed">
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
           An unexpected error occurred. Try refreshing the page, or head back to
           the home screen if the problem persists.
         </p>
 
         {/* Error digest for support (if available) */}
         {error.digest && (
-          <p className="text-xs text-stone-400 dark:text-stone-600 mb-4 font-mono">
+          <p className="text-xs text-slate-400 dark:text-slate-600 mb-4 font-mono">
             Error ID: {error.digest}
           </p>
         )}
@@ -65,7 +65,7 @@ export default function GlobalError({
           </button>
           <Link
             href="/"
-            className="px-5 py-2 text-sm font-medium text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors"
+            className="px-5 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
           >
             Go home
           </Link>

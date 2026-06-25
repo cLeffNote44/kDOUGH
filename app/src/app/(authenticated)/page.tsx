@@ -78,10 +78,10 @@ export default async function HomePage({
         groceryRemaining={groceryRemaining}
       />
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-display font-semibold text-stone-900 dark:text-stone-100">
+        <h1 className="text-xl font-display font-semibold text-slate-900 dark:text-slate-100">
           {isCurrentWeek ? "This Week" : "Week of"}
         </h1>
-        <p className="text-sm text-stone-500 dark:text-stone-400">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           {monday.toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",

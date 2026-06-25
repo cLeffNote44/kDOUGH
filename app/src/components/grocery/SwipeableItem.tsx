@@ -148,7 +148,7 @@ export default function SwipeableItem({
 
       {/* Foreground content */}
       <div
-        className="relative bg-white dark:bg-stone-900"
+        className="relative bg-white dark:bg-slate-900"
         style={{
           transform: `translateX(${offsetX}px)`,
           // Intentional ref read: disables the transform transition during an

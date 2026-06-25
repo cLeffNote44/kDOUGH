@@ -17,7 +17,7 @@ export default function DeleteRecipeButton({
   if (confirming) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-sm text-stone-500 dark:text-stone-400">Delete &ldquo;{title}&rdquo;?</span>
+        <span className="text-sm text-slate-500 dark:text-slate-400">Delete &ldquo;{title}&rdquo;?</span>
         <button
           onClick={async () => {
             setDeleting(true);
@@ -35,7 +35,7 @@ export default function DeleteRecipeButton({
         </button>
         <button
           onClick={() => setConfirming(false)}
-          className="px-3 py-1.5 text-sm font-medium text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors"
+          className="px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
         >
           Cancel
         </button>

@@ -264,7 +264,7 @@ export default function GroceryListView({
 
   const handlePrint = () => {
     const { html } = buildShare();
-    const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Grocery List</title><style>body{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;padding:24px;color:#1c1917}h1{font-size:18px;margin:0 0 8px}h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#78716c;margin:16px 0 4px;border-bottom:1px solid #e7e5e4;padding-bottom:2px}ul{list-style:none;padding:0;margin:0}li{padding:3px 0;font-size:14px}</style></head><body>${html}</body></html>`;
+    const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Grocery List</title><style>body{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;padding:24px;color:#0f172a}h1{font-size:18px;margin:0 0 8px}h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#64748b;margin:16px 0 4px;border-bottom:1px solid #e2e8f0;padding-bottom:2px}ul{list-style:none;padding:0;margin:0}li{padding:3px 0;font-size:14px}</style></head><body>${html}</body></html>`;
     // Print via a hidden iframe — works in the browser and the Electron build
     // (where window.open is denied).
     const iframe = document.createElement("iframe");
@@ -287,18 +287,18 @@ export default function GroceryListView({
     <div className="space-y-4">
       {/* Progress bar */}
       {totalItems > 0 && (
-        <div className="glass rounded-xl border border-stone-200/60 dark:border-stone-700/40 p-4">
+        <div className="glass rounded-xl border border-slate-200/60 dark:border-slate-700/40 p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-stone-600 dark:text-stone-400">
+            <span className="text-sm text-slate-600 dark:text-slate-400">
               {checkedCount} of {totalItems} items
             </span>
-            <span className="text-sm font-medium text-amber-700 dark:text-amber-400">
+            <span className="text-sm font-medium text-teal-700 dark:text-teal-400">
               {totalItems - checkedCount} remaining
             </span>
           </div>
-          <div className="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-2">
+          <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2">
             <div
-              className="bg-amber-500 h-2 rounded-full transition-all duration-300"
+              className="bg-teal-500 h-2 rounded-full transition-all duration-300"
               style={{
                 width: `${totalItems > 0 ? (checkedCount / totalItems) * 100 : 0}%`,
               }}
@@ -312,19 +312,19 @@ export default function GroceryListView({
         <div className="flex items-center gap-2">
           <button
             onClick={handleCopy}
-            className="px-3 py-1.5 text-xs font-medium rounded-lg glass border border-stone-200/60 dark:border-stone-700/40 text-stone-600 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+            className="px-3 py-1.5 text-xs font-medium rounded-lg glass border border-slate-200/60 dark:border-slate-700/40 text-slate-600 dark:text-slate-300 hover:text-teal-700 dark:hover:text-teal-400 transition-colors"
           >
             Copy
           </button>
           <button
             onClick={handlePrint}
-            className="px-3 py-1.5 text-xs font-medium rounded-lg glass border border-stone-200/60 dark:border-stone-700/40 text-stone-600 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+            className="px-3 py-1.5 text-xs font-medium rounded-lg glass border border-slate-200/60 dark:border-slate-700/40 text-slate-600 dark:text-slate-300 hover:text-teal-700 dark:hover:text-teal-400 transition-colors"
           >
             Print
           </button>
           <button
             onClick={handleShare}
-            className="px-3 py-1.5 text-xs font-medium rounded-lg glass border border-stone-200/60 dark:border-stone-700/40 text-stone-600 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+            className="px-3 py-1.5 text-xs font-medium rounded-lg glass border border-slate-200/60 dark:border-slate-700/40 text-slate-600 dark:text-slate-300 hover:text-teal-700 dark:hover:text-teal-400 transition-colors"
           >
             Share
           </button>
@@ -333,7 +333,7 @@ export default function GroceryListView({
 
       {/* Sort toggle */}
       {unchecked.length > 0 && (
-        <div className="flex items-center gap-1 p-1 glass rounded-lg border border-stone-200/60 dark:border-stone-700/40 w-fit">
+        <div className="flex items-center gap-1 p-1 glass rounded-lg border border-slate-200/60 dark:border-slate-700/40 w-fit">
           {([
             { mode: "category" as SortMode, label: "Category" },
             { mode: "alpha" as SortMode, label: "A–Z" },
@@ -344,8 +344,8 @@ export default function GroceryListView({
               onClick={() => setSortMode(mode)}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                 sortMode === mode
-                  ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400"
-                  : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300"
+                  ? "bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-400"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
               }`}
             >
               {label}
@@ -358,15 +358,15 @@ export default function GroceryListView({
       {groups.map((group) => (
         <div
           key={group.key}
-          className="glass rounded-xl border border-stone-200/60 dark:border-stone-700/40 overflow-hidden card-hover-lift"
+          className="glass rounded-xl border border-slate-200/60 dark:border-slate-700/40 overflow-hidden card-hover-lift"
         >
-          <div className="px-4 py-2.5 bg-stone-50/80 dark:bg-stone-800/60 border-b border-stone-200/60 dark:border-stone-700/40">
-            <h2 className="text-sm font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wide flex items-center gap-1.5">
+          <div className="px-4 py-2.5 bg-slate-50/80 dark:bg-slate-800/60 border-b border-slate-200/60 dark:border-slate-700/40">
+            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5">
               {group.icon && <span className="text-base" aria-hidden="true">{group.icon}</span>}
               {group.label}
             </h2>
           </div>
-          <ul className="divide-y divide-stone-100 dark:divide-stone-800">
+          <ul className="divide-y divide-slate-100 dark:divide-slate-800">
             {group.items.map((item) => (
               <SwipeableItem
                 key={item.id}
@@ -375,13 +375,13 @@ export default function GroceryListView({
                 isManual={item.is_manual}
               >
                 <li
-                  className="flex items-center gap-3 px-4 py-3.5 hover:bg-stone-50 dark:hover:bg-stone-800/40 active:bg-stone-100 dark:active:bg-stone-800 transition-colors group cursor-pointer"
+                  className="flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/40 active:bg-slate-100 dark:active:bg-slate-800 transition-colors group cursor-pointer"
                   onClick={() => handleToggle(item.id, item.checked)}
                 >
                   <div
-                    className="w-6 h-6 rounded-md border-2 border-stone-300 dark:border-stone-600 group-hover:border-amber-500 flex-shrink-0 transition-colors"
+                    className="w-6 h-6 rounded-md border-2 border-slate-300 dark:border-slate-600 group-hover:border-teal-500 flex-shrink-0 transition-colors"
                   />
-                  <span className="flex-1 text-stone-800 dark:text-stone-200 text-[15px]">
+                  <span className="flex-1 text-slate-800 dark:text-slate-200 text-[15px]">
                     {formatItemDisplay(item)}
                   </span>
                   {item.is_manual && (
@@ -390,7 +390,7 @@ export default function GroceryListView({
                         e.stopPropagation();
                         handleRemove(item.id);
                       }}
-                      className="sm:opacity-0 sm:group-hover:opacity-100 text-stone-400 dark:text-stone-500 hover:text-red-500 transition-all p-1"
+                      className="sm:opacity-0 sm:group-hover:opacity-100 text-slate-400 dark:text-slate-500 hover:text-red-500 transition-all p-1"
                       aria-label={`Remove ${item.name}`}
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -415,21 +415,21 @@ export default function GroceryListView({
 
       {/* Checked items (collapsed section) */}
       {checked.length > 0 && (
-        <div className="glass rounded-xl border border-stone-200/60 dark:border-stone-700/40 overflow-hidden opacity-60">
-          <div className="px-4 py-2.5 bg-stone-50/80 dark:bg-stone-800/60 border-b border-stone-200/60 dark:border-stone-700/40">
-            <h2 className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">
+        <div className="glass rounded-xl border border-slate-200/60 dark:border-slate-700/40 overflow-hidden opacity-60">
+          <div className="px-4 py-2.5 bg-slate-50/80 dark:bg-slate-800/60 border-b border-slate-200/60 dark:border-slate-700/40">
+            <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
               Done ({checked.length})
             </h2>
           </div>
-          <ul className="divide-y divide-stone-100 dark:divide-stone-800">
+          <ul className="divide-y divide-slate-100 dark:divide-slate-800">
             {checked.map((item) => (
               <li
                 key={item.id}
-                className="flex items-center gap-3 px-4 py-3 cursor-pointer active:bg-stone-50 dark:active:bg-stone-800"
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer active:bg-slate-50 dark:active:bg-slate-800"
                 onClick={() => handleToggle(item.id, item.checked)}
               >
                 <div
-                  className="w-6 h-6 rounded-md border-2 border-amber-400 bg-amber-400 flex-shrink-0 flex items-center justify-center transition-colors"
+                  className="w-6 h-6 rounded-md border-2 border-teal-400 bg-teal-400 flex-shrink-0 flex items-center justify-center transition-colors"
                 >
                   <svg
                     className="w-3.5 h-3.5 text-white"
@@ -445,7 +445,7 @@ export default function GroceryListView({
                     />
                   </svg>
                 </div>
-                <span className="flex-1 text-stone-400 dark:text-stone-500 text-[15px] line-through">
+                <span className="flex-1 text-slate-400 dark:text-slate-500 text-[15px] line-through">
                   {formatItemDisplay(item)}
                 </span>
               </li>
@@ -456,18 +456,18 @@ export default function GroceryListView({
 
       {/* Pantry staples (you likely already have these) */}
       {pantryItems.length > 0 && (
-        <div className="glass rounded-xl border border-stone-200/60 dark:border-stone-700/40 overflow-hidden opacity-75">
-          <div className="px-4 py-2.5 bg-stone-50/80 dark:bg-stone-800/60 border-b border-stone-200/60 dark:border-stone-700/40">
-            <h2 className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide flex items-center gap-1.5">
+        <div className="glass rounded-xl border border-slate-200/60 dark:border-slate-700/40 overflow-hidden opacity-75">
+          <div className="px-4 py-2.5 bg-slate-50/80 dark:bg-slate-800/60 border-b border-slate-200/60 dark:border-slate-700/40">
+            <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
               <span className="text-base" aria-hidden="true">🥫</span>
               Staples — you likely have these ({pantryItems.length})
             </h2>
           </div>
-          <ul className="divide-y divide-stone-100 dark:divide-stone-800">
+          <ul className="divide-y divide-slate-100 dark:divide-slate-800">
             {pantryItems.map((item) => (
               <li
                 key={item.id}
-                className="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400"
+                className="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400"
               >
                 <span className="text-base" aria-hidden="true">·</span>
                 <span className="flex-1 text-[15px]">{formatItemDisplay(item)}</span>

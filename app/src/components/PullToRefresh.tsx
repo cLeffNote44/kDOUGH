@@ -87,7 +87,7 @@ export default function PullToRefresh({
           }}
         >
           <svg
-            className="w-6 h-6 text-amber-500"
+            className="w-6 h-6 text-teal-500"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"

@@ -57,7 +57,7 @@ export default function RecipeForm({ recipe, action, submitLabel }: RecipeFormPr
     // If no error, the action will redirect
   };
 
-  const inputClasses = "w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white/80 dark:bg-stone-800/80 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent";
+  const inputClasses = "w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent";
 
   return (
     <form action={handleSubmit} className="space-y-6 max-w-2xl">
@@ -69,7 +69,7 @@ export default function RecipeForm({ recipe, action, submitLabel }: RecipeFormPr
 
       {/* Title */}
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+        <label htmlFor="title" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
           Recipe Title *
         </label>
         <input
@@ -85,7 +85,7 @@ export default function RecipeForm({ recipe, action, submitLabel }: RecipeFormPr
 
       {/* Description */}
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+        <label htmlFor="description" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
           Description
         </label>
         <input
@@ -101,7 +101,7 @@ export default function RecipeForm({ recipe, action, submitLabel }: RecipeFormPr
       {/* Time & Servings Row */}
       <div className="grid grid-cols-3 gap-4">
         <div>
-          <label htmlFor="prep_time" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+          <label htmlFor="prep_time" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
             Prep (min)
           </label>
           <input
@@ -114,7 +114,7 @@ export default function RecipeForm({ recipe, action, submitLabel }: RecipeFormPr
           />
         </div>
         <div>
-          <label htmlFor="cook_time" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+          <label htmlFor="cook_time" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
             Cook (min)
           </label>
           <input
@@ -127,7 +127,7 @@ export default function RecipeForm({ recipe, action, submitLabel }: RecipeFormPr
           />
         </div>
         <div>
-          <label htmlFor="servings" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+          <label htmlFor="servings" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
             Servings
           </label>
           <input
@@ -143,7 +143,7 @@ export default function RecipeForm({ recipe, action, submitLabel }: RecipeFormPr
 
       {/* Ingredients */}
       <div>
-        <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Ingredients</label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Ingredients</label>
         <div className="space-y-2">
           {ingredients.map((ing, i) => (
             <div key={ing._key} className="flex gap-2 items-start">
@@ -152,27 +152,27 @@ export default function RecipeForm({ recipe, action, submitLabel }: RecipeFormPr
                 value={ing.quantity}
                 onChange={(e) => updateIngredient(i, "quantity", e.target.value)}
                 placeholder="Qty"
-                className="w-20 px-2 py-2 border border-stone-300 dark:border-stone-600 rounded-lg text-sm bg-white/80 dark:bg-stone-800/80 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="w-20 px-2 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
               />
               <input
                 type="text"
                 value={ing.unit}
                 onChange={(e) => updateIngredient(i, "unit", e.target.value)}
                 placeholder="Unit"
-                className="w-24 px-2 py-2 border border-stone-300 dark:border-stone-600 rounded-lg text-sm bg-white/80 dark:bg-stone-800/80 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="w-24 px-2 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
               />
               <input
                 type="text"
                 value={ing.name}
                 onChange={(e) => updateIngredient(i, "name", e.target.value)}
                 placeholder="Ingredient name"
-                className="flex-1 px-2 py-2 border border-stone-300 dark:border-stone-600 rounded-lg text-sm bg-white/80 dark:bg-stone-800/80 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="flex-1 px-2 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
               />
               {ingredients.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeIngredient(i)}
-                  className="px-2 py-2 text-stone-400 dark:text-stone-500 hover:text-red-500 transition-colors"
+                  className="px-2 py-2 text-slate-400 dark:text-slate-500 hover:text-red-500 transition-colors"
                   title="Remove ingredient"
                 >
                   &times;
@@ -184,7 +184,7 @@ export default function RecipeForm({ recipe, action, submitLabel }: RecipeFormPr
         <button
           type="button"
           onClick={addIngredient}
-          className="mt-2 text-sm text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 font-medium"
+          className="mt-2 text-sm text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 font-medium"
         >
           + Add ingredient
         </button>
@@ -192,7 +192,7 @@ export default function RecipeForm({ recipe, action, submitLabel }: RecipeFormPr
 
       {/* Instructions */}
       <div>
-        <label htmlFor="instructions" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+        <label htmlFor="instructions" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
           Instructions
         </label>
         <textarea
@@ -207,7 +207,7 @@ export default function RecipeForm({ recipe, action, submitLabel }: RecipeFormPr
 
       {/* Source URL */}
       <div>
-        <label htmlFor="source_url" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+        <label htmlFor="source_url" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
           Source URL
         </label>
         <input
@@ -222,7 +222,7 @@ export default function RecipeForm({ recipe, action, submitLabel }: RecipeFormPr
 
       {/* Tags */}
       <div>
-        <label htmlFor="tags" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+        <label htmlFor="tags" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
           Tags
         </label>
         <input

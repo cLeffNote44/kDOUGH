@@ -11,7 +11,7 @@ export default function MobileHeader() {
   const handleSignOut = () => signOut(router);
 
   return (
-    <header className="md:hidden sticky top-0 z-40 glass-strong border-b border-stone-200/60 dark:border-stone-700/40">
+    <header className="md:hidden sticky top-0 z-40 glass-strong border-b border-slate-200/60 dark:border-slate-700/40">
       <div className="flex items-center justify-between h-12 px-4">
         {/* Logo */}
         <button
@@ -19,7 +19,7 @@ export default function MobileHeader() {
           className="flex items-center gap-2"
         >
           <img src="/favicon-32.png" alt="" className="w-6 h-6 rounded-md" />
-          <span className="font-display font-semibold text-amber-700 dark:text-amber-400">
+          <span className="font-display font-semibold text-teal-700 dark:text-teal-400">
             kDOUGH
           </span>
         </button>
@@ -29,7 +29,7 @@ export default function MobileHeader() {
           {/* Theme toggle */}
           <button
             onClick={toggle}
-            className="p-2 rounded-lg text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
+            className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
             aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           >
             {theme === "dark" ? (
@@ -46,7 +46,7 @@ export default function MobileHeader() {
           {/* Sign out */}
           <button
             onClick={handleSignOut}
-            className="p-2 rounded-lg text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
+            className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
             aria-label="Sign out"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
