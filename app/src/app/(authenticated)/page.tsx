@@ -12,6 +12,9 @@ export default async function HomePage({
 }) {
   const { week } = await searchParams;
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const monday = getMonday(week);
   const mondayStr = toDateString(monday);
@@ -37,11 +40,13 @@ export default async function HomePage({
 
     // Unchecked grocery items for current week
     (async () => {
+      if (!user) return { count: 0 };
       const { data: list } = await supabase
         .from("grocery_lists")
         .select("id")
         .eq("week_start", mondayStr)
-        .single();
+        .eq("user_id", user.id)
+        .maybeSingle();
 
       if (!list) return { count: 0 };
 

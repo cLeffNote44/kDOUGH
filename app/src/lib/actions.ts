@@ -172,6 +172,11 @@ export async function updateRecipe(id: string, formData: FormData) {
 }
 
 export async function deleteRecipe(id: string) {
+  // Note: meal_plans referencing this recipe cascade-delete (FK ON DELETE
+  // CASCADE), but already-generated grocery_items keep this id in their
+  // recipe_ids[] array (no element FKs in Postgres). That's intentional —
+  // grocery lists are point-in-time snapshots; the recipe view degrades to
+  // "Unknown" and regenerating the list self-corrects.
   const idResult = uuidSchema.safeParse(id);
   if (!idResult.success) {
     return { error: "Invalid recipe ID" };

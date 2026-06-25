@@ -15,16 +15,23 @@ export default async function GroceryPage({
 }) {
   const { week } = await searchParams;
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const monday = getMonday(week);
   const weekStart = toDateString(monday);
 
-  // Fetch grocery list for the selected week
-  const { data: groceryList } = await supabase
-    .from("grocery_lists")
-    .select("id, week_start")
-    .eq("week_start", weekStart)
-    .maybeSingle();
+  // Fetch grocery list for the selected week. Explicit user_id filter as
+  // defense-in-depth alongside RLS (matches the rest of the app).
+  const { data: groceryList } = user
+    ? await supabase
+        .from("grocery_lists")
+        .select("id, week_start")
+        .eq("week_start", weekStart)
+        .eq("user_id", user.id)
+        .maybeSingle()
+    : { data: null };
 
   let items: GroceryItem[] = [];
   if (groceryList) {
