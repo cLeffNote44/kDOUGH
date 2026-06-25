@@ -44,7 +44,7 @@ async function requireAuth() {
 export async function createRecipe(formData: FormData) {
   const auth = await requireAuth();
   if (auth.error) return { error: auth.error };
-  const { supabase } = auth;
+  const { supabase, user } = auth;
 
   let ingredients: Ingredient[] = [];
   try {
@@ -79,6 +79,7 @@ export async function createRecipe(formData: FormData) {
   const { data, error } = await supabase
     .from("recipes")
     .insert({
+      user_id: user.id,
       title: parsed.data.title,
       description: parsed.data.description || null,
       ingredients: parsed.data.ingredients,
@@ -216,12 +217,13 @@ export async function saveImportedRecipe(recipe: {
 
   const auth = await requireAuth();
   if (auth.error) return { error: auth.error };
-  const { supabase } = auth;
+  const { supabase, user } = auth;
 
   const r = parsed.data;
   const { data, error } = await supabase
     .from("recipes")
     .insert({
+      user_id: user.id,
       title: r.title,
       description: r.description || null,
       ingredients: r.ingredients,
