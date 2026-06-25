@@ -9,7 +9,7 @@
 
 // Bumped to v3 so the activate handler purges older caches that may contain
 // user-specific HTML pages cached by the previous network-first-for-pages logic.
-const CACHE_NAME = "kdough-v4";
+const CACHE_NAME = "kdough-v5";
 // Only static, non-user-specific assets are precached. "/" is intentionally NOT
 // listed — it renders authenticated, user-specific HTML and must never be cached
 // (cross-user leakage on shared devices + staleness).
