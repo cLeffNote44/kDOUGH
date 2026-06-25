@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { Ingredient, GroceryItem, PantryItem } from "@/types";
 import { categorizeIngredient } from "@/lib/import/parser";
-import { resolveRecipeImageUrl } from "@/lib/recipe-images";
+import { resolveRecipeImageUrl, isStoredImageUrl } from "@/lib/recipe-images";
 import {
   aggregateMealPlanIngredients,
   type MealPlanWithRecipe,
@@ -269,6 +269,44 @@ export async function saveImportedRecipe(recipe: {
 
   revalidatePath("/recipes");
   return { id: data.id };
+}
+
+/**
+ * One-shot maintenance: re-host any of the user's recipe images that still point
+ * at an external site (e.g. older imports) into our storage bucket, so they load
+ * reliably. A server-side fetch isn't subject to the source site's hotlink
+ * protection. Rows are only updated when re-hosting actually succeeds.
+ */
+export async function rehostExternalRecipeImages() {
+  const auth = await requireAuth();
+  if (auth.error) return { error: auth.error };
+  const { supabase, user } = auth;
+
+  const { data: recipes } = await supabase
+    .from("recipes")
+    .select("id, image_url")
+    .eq("user_id", user.id);
+
+  let fixed = 0;
+  let failed = 0;
+  for (const r of recipes ?? []) {
+    const url = (r.image_url ?? "").trim();
+    if (!url || isStoredImageUrl(url) || !/^https?:\/\//i.test(url)) continue;
+    const stored = await resolveRecipeImageUrl(supabase, user.id, url);
+    if (stored && isStoredImageUrl(stored)) {
+      await supabase
+        .from("recipes")
+        .update({ image_url: stored })
+        .eq("id", r.id)
+        .eq("user_id", user.id);
+      fixed++;
+    } else {
+      failed++;
+    }
+  }
+
+  if (fixed > 0) revalidatePath("/recipes");
+  return { fixed, failed };
 }
 
 // ============================================

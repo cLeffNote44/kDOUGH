@@ -349,7 +349,7 @@ export default function GroceryListView({
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                 sortMode === mode
                   ? "bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-400"
-                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white"
               }`}
             >
               {label}
@@ -394,7 +394,7 @@ export default function GroceryListView({
                         e.stopPropagation();
                         handleRemove(item.id);
                       }}
-                      className="sm:opacity-0 sm:group-hover:opacity-100 text-slate-400 dark:text-slate-500 hover:text-red-500 transition-all p-1"
+                      className="sm:opacity-0 sm:group-hover:opacity-100 text-slate-400 dark:text-slate-300 hover:text-red-500 transition-all p-1"
                       aria-label={`Remove ${item.name}`}
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -449,7 +449,7 @@ export default function GroceryListView({
                     />
                   </svg>
                 </div>
-                <span className="flex-1 text-slate-400 dark:text-slate-500 text-[15px] line-through">
+                <span className="flex-1 text-slate-400 dark:text-slate-300 text-[15px] line-through">
                   {formatItemDisplay(item)}
                 </span>
               </li>

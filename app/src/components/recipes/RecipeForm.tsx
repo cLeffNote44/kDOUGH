@@ -177,7 +177,7 @@ export default function RecipeForm({ recipe, userId, action, submitLabel }: Reci
                 <button
                   type="button"
                   onClick={() => removeIngredient(i)}
-                  className="px-2 py-2 text-slate-400 dark:text-slate-500 hover:text-red-500 transition-colors"
+                  className="px-2 py-2 text-slate-400 dark:text-slate-300 hover:text-red-500 transition-colors"
                   title="Remove ingredient"
                 >
                   &times;

@@ -61,7 +61,7 @@ export default function RecipeSearch({
           <button
             type="button"
             onClick={handleClear}
-            className="px-3 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 text-sm transition-colors"
+            className="px-3 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white text-sm transition-colors"
           >
             Clear
           </button>

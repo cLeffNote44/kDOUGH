@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import RecipeSearch from "@/components/recipes/RecipeSearch";
 import RecipeCard from "@/components/recipes/RecipeCard";
+import RehostImagesButton from "@/components/recipes/RehostImagesButton";
 import QuickAddFAB from "@/components/recipes/QuickAddFAB";
 import { EmptyRecipesIllustration } from "@/components/ui/EmptyStateIllustrations";
 
@@ -43,6 +44,15 @@ export default async function RecipesPage({
     )
   ).sort();
 
+  // Older recipes may still hotlink their image from the source site (which can
+  // fail to load); offer a one-click re-host into storage when any are present.
+  const hasExternalImages = (recipes ?? []).some(
+    (r) =>
+      !!r.image_url &&
+      /^https?:\/\//i.test(r.image_url) &&
+      !r.image_url.includes("/storage/v1/object/public/recipe-images/")
+  );
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -72,7 +82,7 @@ export default async function RecipesPage({
           <p className="text-slate-500 dark:text-slate-400 mb-2">
             {q || tag ? "No recipes match your search" : "No recipes yet"}
           </p>
-          <p className="text-sm text-slate-400 dark:text-slate-500">
+          <p className="text-sm text-slate-400 dark:text-slate-300">
             {q || tag ? (
               <Link href="/recipes" className="text-teal-600 dark:text-teal-400 underline">
                 Clear filters
@@ -84,8 +94,9 @@ export default async function RecipesPage({
         </div>
       ) : (
         <>
+          {hasExternalImages && <RehostImagesButton />}
           {(q || tag) && (
-            <p className="text-sm text-slate-400 dark:text-slate-500 mb-3">
+            <p className="text-sm text-slate-400 dark:text-slate-300 mb-3">
               {recipes.length} recipe{recipes.length !== 1 ? "s" : ""} found
             </p>
           )}
